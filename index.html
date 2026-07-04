@@ -256,6 +256,24 @@
   .btnrow{display:flex;gap:10px}
   .btnrow .btn{flex:1;margin:0}
 
+  /* missions / points */
+  .mission-card{margin-top:16px}
+  .mc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .mc-head b{font-size:15px}
+  .pts{font-size:13px;font-weight:800;color:var(--accent);background:var(--blue);padding:5px 13px;border-radius:999px}
+  .mission{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:.15s;background:var(--white)}
+  .mission:active{transform:scale(.99)}
+  .mission.done{background:rgba(37,180,133,.07);border-color:rgba(37,180,133,.3)}
+  .m-ic{width:38px;height:38px;flex:none;border-radius:11px;background:var(--blue);color:var(--accent);display:flex;align-items:center;justify-content:center}
+  .m-ic svg{width:20px;height:20px}
+  .mission.done .m-ic{background:var(--low);color:#fff}
+  .m-body{flex:1;min-width:0}
+  .m-body b{display:block;font-size:14px;font-weight:700}
+  .m-body span{font-size:11.5px;color:var(--gray);font-weight:700}
+  .m-check{width:24px;height:24px;flex:none;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}
+  .mission.done .m-check{background:var(--low);border-color:var(--low)}
+  .mc-foot{font-size:12px;color:var(--gray);text-align:center;margin-top:6px;font-weight:700}
+
   /* ===== redesign: dashboard look ===== */
   .wrap{padding-bottom:96px}
   .card{box-shadow:var(--shadow)}
@@ -352,6 +370,15 @@
     <div class="card">
       <button class="btn accent" onclick="go('form')">診断をはじめる</button>
       <button class="btn ghost small" style="margin-top:10px" onclick="go('form')">所要時間 約1分</button>
+    </div>
+
+    <div class="card mission-card">
+      <div class="mc-head">
+        <b>今日のミッション</b>
+        <span class="pts" id="ptsTotal">0 pt</span>
+      </div>
+      <div id="missionList"></div>
+      <div class="mc-foot" id="missionFoot"></div>
     </div>
 
     <div class="card qr-card">
@@ -550,26 +577,34 @@ const PRODUCTS = [
   }
 ];
 
-/* 診断フォームの質問（加算対象） */
+/* 診断フォームの質問（w=重み。スコアを細かく散らすため項目ごとに差をつける） */
 const QUESTIONS = [
-  {id:"stumble",   label:"最近つまずくことがある"},
-  {id:"onefoot",   label:"片足立ちが不安"},
-  {id:"pain",      label:"膝・腰・足裏に痛みがある"},
-  {id:"longstand", label:"長時間立つ仕事をしている"},
-  {id:"sway",      label:"歩くと左右にふらつく感じがある"}
+  {id:"stumble",   label:"最近つまずくことがある",         w:9},
+  {id:"onefoot",   label:"片足立ちが不安",               w:8},
+  {id:"pain",      label:"膝・腰・足裏に痛みがある",       w:6},
+  {id:"longstand", label:"長時間立つ仕事をしている",       w:4},
+  {id:"sway",      label:"歩くと左右にふらつく感じがある", w:10}
 ];
 
-/* 質問UIを生成（はい／いいえ） */
+/* 回答の3段階（値が大きいほどリスク寄り） */
+const ANSWER_OPTS = [
+  {v:"0",   label:"いいえ"},
+  {v:"0.5", label:"ときどき"},
+  {v:"1",   label:"はい", cls:"yes"}
+];
+
+/* 質問UIを生成（いいえ／ときどき／はい） */
 (function renderQuestions(){
   const box = document.getElementById("questions");
   box.innerHTML = QUESTIONS.map(q=>`
     <div class="field">
       <p class="qtitle">${q.label}</p>
       <div class="seg yn">
-        <input type="radio" name="${q.id}" id="${q.id}_y" class="yes" value="1">
-        <label for="${q.id}_y">はい</label>
-        <input type="radio" name="${q.id}" id="${q.id}_n" value="0" checked>
-        <label for="${q.id}_n">いいえ</label>
+        ${ANSWER_OPTS.map(o=>{
+          const id = `${q.id}_${o.v.replace('.','')}`;
+          return `<input type="radio" name="${q.id}" id="${id}" class="${o.cls||''}" value="${o.v}" ${o.v==="0"?"checked":""}>
+        <label for="${id}">${o.label}</label>`;
+        }).join("")}
       </div>
     </div>
   `).join("");
@@ -629,6 +664,50 @@ function fmtDate(d){ return d ? d.replace(/-/g,"/") : ""; }
   el.value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
 })();
 
+/* =========================================================
+   ミッション & ポイント（たたき台・MISSIONSに足すだけで増える）
+   ・毎日リセット（日付ごとに達成を記録）
+   ・達成でポイント加算、再タップで取り消し
+   ========================================================= */
+const MISSIONS = [
+  {id:"walk",    label:"5,000歩あるく",         pt:2, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.6"/><path d="M13 8l-3 3 2 3 1 5M13 11l3 1 3-1M10 11l-3 2-2 4"/></svg>'},
+  {id:"stretch", label:"ストレッチ3分",          pt:1, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="1.6"/><path d="M12 7v6M12 13l-3 6M12 13l3 6M6 9h12"/></svg>'},
+  {id:"wear",    label:"MARINE COREを装着",      pt:2, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15c2 0 3-1 5-1s3 2 6 2 4-2 4-4c0-1-1-2-3-2-3 0-4-3-7-3S4 9 4 12v3Z"/></svg>'},
+  {id:"balance", label:"片足立ち 左右30秒",       pt:1, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 21h14M6 7l-3 6a3 3 0 0 0 6 0L6 7Zm12 0-3 6a3 3 0 0 0 6 0l-3-6Z"/></svg>'},
+  {id:"heel",    label:"かかと上げ 10回×2",       pt:1, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8M8 8l4-4 4 4M6 20h12"/></svg>'}
+];
+function todayStr(){ const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; }
+function loadPoints(){ return parseInt(localStorage.getItem("mcb_points")||"0",10) || 0; }
+function savePoints(p){ try{ localStorage.setItem("mcb_points", String(Math.max(0,p))); }catch(e){} }
+function loadMissionLog(){ try{ return JSON.parse(localStorage.getItem("mcb_mission_log")) || {}; }catch(e){ return {}; } }
+function saveMissionLog(m){ try{ localStorage.setItem("mcb_mission_log", JSON.stringify(m)); }catch(e){} }
+
+function renderMissions(){
+  const log = loadMissionLog(), today = todayStr(), done = log[today] || [];
+  document.getElementById("ptsTotal").textContent = loadPoints() + " pt";
+  document.getElementById("missionList").innerHTML = MISSIONS.map(m=>{
+    const c = done.includes(m.id);
+    return `<div class="mission ${c?'done':''}" onclick="toggleMission('${m.id}')">
+      <div class="m-ic">${m.icon}</div>
+      <div class="m-body"><b>${m.label}</b><span>+${m.pt}ポイント</span></div>
+      <div class="m-check">${c?'✓':''}</div>
+    </div>`;
+  }).join("");
+  const gained = done.reduce((s,id)=>{ const m=MISSIONS.find(x=>x.id===id); return s+(m?m.pt:0); }, 0);
+  document.getElementById("missionFoot").textContent =
+    done.length ? `本日 ${done.length}/${MISSIONS.length} 達成 ・ +${gained}pt` : "タップして達成を記録しましょう";
+}
+function toggleMission(id){
+  const m = MISSIONS.find(x=>x.id===id); if(!m) return;
+  const log = loadMissionLog(), today = todayStr();
+  const set = new Set(log[today] || []);
+  let p = loadPoints();
+  if(set.has(id)){ set.delete(id); p -= m.pt; } else { set.add(id); p += m.pt; }
+  log[today] = [...set]; saveMissionLog(log); savePoints(p);
+  renderMissions();
+}
+renderMissions();
+
 /* 前回との比較を描画 */
 function renderCompare(prev, cur){
   const box = document.getElementById("compare");
@@ -636,12 +715,15 @@ function renderCompare(prev, cur){
     box.innerHTML = `<div class="cmp-empty"><b>初回測定です</b>次回の診断から、前回との比較を表示します。</div>`;
     return;
   }
-  const prevScore = marineScore(prev.riskPct);
+  // 旧レコード互換のフォールバック
+  const prevScore   = prev.score   != null ? prev.score   : marineScore(prev.riskPct);
+  const prevFootAge = prev.footAge != null ? prev.footAge : (prev.standAge != null ? prev.standAge - 6 : prev.age);
+  const prevRisk    = prev.riskPct != null ? prev.riskPct : (100 - prevScore);
   // higher=true は「高いほど良好」、false は「低いほど良好」
   const rows = [
-    {lbl:"MARINE SCORE", unit:"点", prev:prevScore,        now:cur.score,        higher:true},
-    {lbl:"足年齢",       unit:"歳", prev:prev.standAge-6,   now:cur.standAge-6,   higher:false},
-    {lbl:"リスク点数",    unit:"点", prev:prev.total,        now:cur.total,        higher:false}
+    {lbl:"MARINE SCORE", unit:"点", prev:prevScore,   now:cur.score,   higher:true},
+    {lbl:"足年齢",       unit:"歳", prev:prevFootAge, now:cur.footAge, higher:false},
+    {lbl:"転倒リスク",    unit:"%", prev:prevRisk,    now:cur.riskPct, higher:false}
   ];
   box.innerHTML =
     `<div class="cmp-empty" style="padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:6px">
@@ -752,42 +834,34 @@ function diagnose(){
   const mdate = document.getElementById("mdate").value ||
     new Date().toISOString().slice(0,10);
 
-  // 質問の加点（各2点）
-  let qScore = 0;
+  // 回答（0=いいえ / 0.5=ときどき / 1=はい）× 項目別の重み
   const answers = {};
+  let qPenalty = 0;
   QUESTIONS.forEach(q=>{
-    const v = parseInt(document.querySelector(`input[name="${q.id}"]:checked`).value,10);
+    const v = parseFloat(document.querySelector(`input[name="${q.id}"]:checked`).value) || 0;
     answers[q.id] = v;
-    if(v) qScore += 2;
+    qPenalty += q.w * v;
   });
 
-  // 年齢による加点
-  let ageScore = 0;
-  if(age >= 75) ageScore = 6;
-  else if(age >= 65) ageScore = 4;
-  else if(age >= 55) ageScore = 3;
-  else if(age >= 45) ageScore = 2;
-  else if(age >= 35) ageScore = 1;
+  // 年齢は連続で減点（35歳以降 0.5点/歳・最大24点）
+  const agePenalty = Math.max(0, Math.min(24, (age - 35) * 0.5));
 
-  const total = qScore + ageScore;            // 最大 10 + 6 = 16
-  const riskPct = Math.min(100, Math.round(total / 16 * 100));
+  // ===== MARINE SCORE（0〜100・高いほど良い・1点刻みで密に）=====
+  const score = Math.round(Math.max(30, Math.min(100, 100 - agePenalty - qPenalty)));
+  const riskPct = 100 - score;
 
-  // リスク3段階
-  let level, lvlClass, lvlText;
-  if(total <= 4){ level="low";  lvlClass="lvl-low";  lvlText="低リスク"; }
-  else if(total <= 9){ level="mid";  lvlClass="lvl-mid";  lvlText="中リスク"; }
-  else { level="high"; lvlClass="lvl-high"; lvlText="高リスク"; }
+  // リスク3段階（スコア基準）
+  let level, lvlText;
+  if(score >= 78){ level="low";  lvlText="低リスク"; }
+  else if(score >= 58){ level="mid"; lvlText="中リスク"; }
+  else { level="high"; lvlText="高リスク"; }
 
-  // 立位年齢・改善予測（記録／メール用に保持）
-  const standAge = age + total;
-  const drop = level==="high" ? 10 : level==="mid" ? 8 : 5;
-  const improveAge = Math.max(age - 2, standAge - drop);
+  // 足年齢（スコアが高いほど実年齢より若い）・改善予測スコア
+  const footAge = Math.max(age-15, Math.min(age+20, age + Math.round((70 - score) / 4)));
+  const improveScore = Math.min(100, score + (level==="high" ? 15 : level==="mid" ? 10 : 6));
 
   // 前回記録（保存前に取得）
   const prev = historyFor(name).slice(-1)[0] || null;
-
-  // ===== MARINE SCORE（0〜100・高いほど良い）=====
-  const score = marineScore(riskPct);
   const band =
     score>=90 ? {l:"Excellent",  st:5, c:"var(--low)"} :
     score>=78 ? {l:"Very Good",  st:4, c:"var(--low)"} :
@@ -809,19 +883,18 @@ function diagnose(){
   gFill.style.strokeDasharray = "0 100";
 
   // ===== 4指標（回答から算出）=====
-  const footAge = Math.max(age - 15, age + total - 6);
   const fdiff = age - footAge;
   setMetric("mFootAge", `${footAge}<small>歳</small>`, fdiff>=0 ? "c-green" : "c-amber",
     "mFootAgeSub", fdiff>0 ? `実年齢より${fdiff}歳若い！` : fdiff<0 ? `実年齢より${-fdiff}歳上` : "実年齢と同じ");
 
-  let bal = 96 - (answers.sway?14:0) - (answers.onefoot?7:0) - (answers.stumble?4:0);
+  let bal = Math.round(97 - answers.sway*16 - answers.onefoot*9 - answers.stumble*5);
   bal = Math.max(55, Math.min(99, bal));
   setMetric("mBalance", `${bal}<small>%</small>`, bal>=80 ? "c-green" : bal>=70 ? "c-blue" : "c-amber",
     "mBalanceSub", bal>=90 ? "とても良い" : bal>=80 ? "良い" : bal>=70 ? "ふつう" : "要改善");
 
   const gi = answers.stumble + answers.onefoot + answers.sway;
-  const gait = gi===0 ? {g:"A+", s:"非常に安定", c:"c-green"} : gi===1 ? {g:"A", s:"安定", c:"c-green"}
-             : gi===2 ? {g:"B", s:"やや不安定", c:"c-amber"} : {g:"C", s:"不安定", c:"c-red"};
+  const gait = gi<0.5 ? {g:"A+", s:"非常に安定", c:"c-green"} : gi<1.2 ? {g:"A", s:"安定", c:"c-green"}
+             : gi<2.1 ? {g:"B", s:"やや不安定", c:"c-amber"} : {g:"C", s:"不安定", c:"c-red"};
   setMetric("mGait", gait.g, gait.c, "mGaitSub", gait.s);
 
   const fall = level==="low" ? {t:"低い", s:"安心です", c:"c-green", ic:"g"}
@@ -842,10 +915,10 @@ function diagnose(){
     (shop ? `<br>${shop}` : "");
 
   // 前回との比較
-  renderCompare(prev, {score, standAge, total, riskPct});
+  renderCompare(prev, {score, footAge, riskPct});
 
   // 今回の記録を保存
-  const record = { name, email, phone, store, staff, date:mdate, age, total, riskPct, standAge, improveAge, level, lvlText, ts:Date.now() };
+  const record = { name, email, phone, store, staff, date:mdate, age, score, riskPct, footAge, improveScore, level, lvlText, ts:Date.now() };
   const all = loadAll();
   all.push(record);
   saveAll(all);
@@ -908,8 +981,8 @@ function exportCSV(){
   const cols = [
     ["date","測定日"],["store","店舗名"],["staff","担当者名"],["name","お名前"],
     ["email","メールアドレス"],["phone","電話番号"],["age","年齢"],
-    ["total","リスク点数"],["riskPct","転倒リスク(%)"],["standAge","立位年齢"],
-    ["improveAge","改善予測(歳)"],["lvlText","リスク判定"]
+    ["score","MARINE SCORE"],["riskPct","転倒リスク(%)"],["footAge","足年齢"],
+    ["improveScore","改善予測(点)"],["lvlText","リスク判定"]
   ];
   const q = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
   const head = cols.map(c=>q(c[1])).join(",");
@@ -945,10 +1018,10 @@ function mailResult(){
     r.phone ? `電話：${r.phone}` : ""
   ].filter(Boolean).join("\n");
   const score = [
-    `リスク判定：${r.lvlText}（${r.riskPct}%）`,
-    `リスク点数：${r.total} 点`,
-    `実年齢：${r.age} 歳 ／ 立位年齢：${r.standAge} 歳`,
-    `改善予測：${r.improveAge} 歳相当（継続ケア後）`
+    `MARINE SCORE：${r.score} 点（${r.lvlText}）`,
+    `実年齢：${r.age} 歳 ／ 足年齢：${r.footAge} 歳`,
+    `転倒リスク：${r.riskPct}%`,
+    `改善予測：継続ケアで MARINE SCORE ${r.improveScore} 点相当まで期待`
   ].join("\n");
   const foot = [
     "▼ 詳しい診断・ご相談はこちら",
@@ -971,7 +1044,7 @@ function restart(){
   const t = new Date();
   document.getElementById("mdate").value =
     `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
-  QUESTIONS.forEach(q=>{ document.getElementById(q.id+"_n").checked = true; });
+  QUESTIONS.forEach(q=>{ document.getElementById(q.id+"_0").checked = true; });
   const img = document.getElementById("preview");
   img.style.display = "none"; img.src = "";
   document.getElementById("shot").value = "";
