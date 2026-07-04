@@ -241,6 +241,18 @@
   .hitem .hd.cur{color:var(--accent)}
   .hitem .hs{font-weight:800}
   .hitem .hs small{color:var(--gray);font-weight:600;font-size:11px;margin-left:4px}
+
+  /* QR share card */
+  .qr-card{display:flex;gap:16px;align-items:center;margin-top:16px}
+  .qr-box{flex:none;width:96px;height:96px;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);padding:6px}
+  .qr-box img{width:100%;height:100%;display:block;image-rendering:pixelated}
+  .qr-info b{font-size:15px;font-weight:700}
+  .qr-info p{margin:2px 0 8px;font-size:12px;color:var(--gray);line-height:1.5}
+  .qr-link{font-size:12px;font-weight:700;color:var(--accent);text-decoration:none;word-break:break-all}
+
+  /* button row */
+  .btnrow{display:flex;gap:10px}
+  .btnrow .btn{flex:1;margin:0}
 </style>
 </head>
 <body>
@@ -268,6 +280,16 @@
       <button class="btn accent" onclick="go('form')">診断をはじめる</button>
       <button class="btn ghost small" style="margin-top:10px" onclick="go('form')">所要時間 約1分</button>
     </div>
+
+    <div class="card qr-card">
+      <div class="qr-box"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKAAQMAAAA2A1tgAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC5klEQVR4nO3bQXKjMBCFYbm80NJH4Cg+mjkaR+EILFm40BSim24BGScTJUNS/9vIFtYHO1U3cgiEkN+RW9olzzfzGFPq1l9eUhplTPP8Zb9yAAQEBAQErAu2waURUHOffzjamHMTcPC/vAICAgICAn4BeE1Lnrbb9fNvYp7VUeBJgAV8yKUWEBAQEBDwu0BNF4J8mqRU090OEBAQEBDw/4HaPyz6hnYjQEBAQEDAHwm6OFAWum00SK334Q4nICAgICDgv4HbaENS35ZZjTduwG0AAQEBAQFrgoeJ8tbMfTdwSffWWkBAQEBAwFpg0T9ckuebVKZbYU2567WAgICAgICnB8P84kvfll0326fGbaNbSBuVa0MSEBAQEBCwNqhzmn6FgtV4o93jvgMtgICAgICA9cAFSALrQl0hgPtLWJISLdd1FzmH+AQEBAQEBKwOFiVZs+kfdgJnQEu04gjHcoPWTwECAgICAp4SzAcanwK4nVDhYqHWfMNRredP3QMCAgICAtYFDYpS+4126j4v1NGdum//susBAgICAgJ+CgzWS8wX+vlTtLHzY/CNySANyRIBBAQEBASsBhaH5LVES7LrJekfakmmedE/BAQEBAQEPC2o0an9wcXRFu4z2VMNgICAgICAdUHd9ezU/WiNyW26oE8xFWOrTwAICAgICPgFYE4vu54D7W1ZkIbkzRqUD5k/bkgCAgICAgJ+Flxi/UNXmmkyFP2up5ns+wAICAgICHhm8DAxb6cC6Q3KhmQn1x9+EhAQEBAQsCZYbGBL8g8bGe/+ymjf86n7wcBWHwYQEBAQELAiuH5eoWhw8OcP3e7XyUVtSK4BBAQEBASsCpaH5O1IxwJZ3/DdDUlAQEBAQMCfBPby1zCF32pIFvOAgICAgIDfBFriC0gXB0BAQEBAwNqgS2ONyKJEy8BBQzKsb88AAQEBAQHrg9vsSzMF9AaDHJrXp/FPBQgICAgIeFqQEPIb8gdBiPZbNyqWUwAAAABJRU5ErkJggg==" alt="MARINE CORE Balance QRコード"></div>
+      <div class="qr-info">
+        <b>スマホで開く</b>
+        <p>お客様のスマートフォンでこのQRを読み取ると、診断ページが開きます。</p>
+        <a class="qr-link" href="https://naomimatsui.github.io/marinecore/" target="_blank" rel="noopener">naomimatsui.github.io/marinecore</a>
+      </div>
+    </div>
+
     <p class="foot">MARINE CORE — 足元バランスの新基準</p>
   </section>
 
@@ -277,13 +299,29 @@
     <h2 style="font-size:22px;font-weight:800;margin:6px 4px 18px">バランス診断</h2>
 
     <div class="card">
+      <div class="field row2">
+        <div>
+          <label>店舗名 <span class="hint">任意</span></label>
+          <input class="num" type="text" id="store" placeholder="例：〇〇店">
+        </div>
+        <div>
+          <label>担当者名 <span class="hint">任意</span></label>
+          <input class="num" type="text" id="staff" placeholder="例：佐藤">
+        </div>
+      </div>
       <div class="field">
         <label>お名前 <span class="hint">履歴の記録に使用</span></label>
         <input class="num" type="text" id="name" placeholder="例：山田 太郎" autocomplete="name">
       </div>
-      <div class="field">
-        <label>メールアドレス <span class="hint">任意</span></label>
-        <input class="num" type="email" id="email" placeholder="例：taro@example.com" autocomplete="email" inputmode="email">
+      <div class="field row2">
+        <div>
+          <label>メールアドレス <span class="hint">任意</span></label>
+          <input class="num" type="email" id="email" placeholder="taro@example.com" autocomplete="email" inputmode="email">
+        </div>
+        <div>
+          <label>電話番号 <span class="hint">任意</span></label>
+          <input class="num" type="tel" id="phone" inputmode="tel" placeholder="090-1234-5678" autocomplete="tel">
+        </div>
       </div>
       <div class="field row2">
         <div>
@@ -355,7 +393,11 @@
 
     <div class="note" id="note"></div>
 
-    <button class="btn" style="margin-top:20px" onclick="restart()">もう一度診断する</button>
+    <div class="btnrow" style="margin-top:20px">
+      <button class="btn ghost small" onclick="mailResult()">結果をメールで送る</button>
+      <button class="btn ghost small" onclick="exportCSV()">CSV書き出し</button>
+    </div>
+    <button class="btn" style="margin-top:10px" onclick="restart()">もう一度診断する</button>
     <p class="foot">© MARINE CORE Balance</p>
   </section>
 
@@ -442,6 +484,7 @@ function previewShot(e){
    ========================================================= */
 const STORE_KEY = "mcb_history_v1";
 const MAX_SCORE = 16;
+let lastRecord = null;   // 直近の診断結果（メール送信用）
 
 function loadAll(){
   try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
@@ -555,6 +598,9 @@ function diagnose(){
 
   const name = (document.getElementById("name").value || "").trim() || "ゲスト";
   const email = (document.getElementById("email").value || "").trim();
+  const phone = (document.getElementById("phone").value || "").trim();
+  const store = (document.getElementById("store").value || "").trim();
+  const staff = (document.getElementById("staff").value || "").trim();
   const mdate = document.getElementById("mdate").value ||
     new Date().toISOString().slice(0,10);
 
@@ -609,18 +655,23 @@ function diagnose(){
   document.getElementById("riskLabel").textContent = `${lvlText}（${riskPct}%）`;
 
   // 測定者・測定日の表示
+  const contact = [email && esc(email), phone && esc(phone)].filter(Boolean).join("　");
+  const shop = [store && esc(store)+"店舗", staff && "担当 "+esc(staff)].filter(Boolean).join("　");
   document.getElementById("metaLine").innerHTML =
     `<b>${esc(name)}</b> 様<span>|</span>測定日 <b>${fmtDate(mdate)}</b><span>|</span>年齢 <b>${age}</b>歳` +
-    (email ? `<br>${esc(email)}` : "");
+    (contact ? `<br>${contact}` : "") +
+    (shop ? `<br>${shop}` : "");
 
   // 前回との比較（保存前に前回記録を取得）
   const prev = historyFor(name).slice(-1)[0] || null;
   renderCompare(prev, {standAge, total, riskPct});
 
   // 今回の記録を保存
+  const record = { name, email, phone, store, staff, date:mdate, age, total, riskPct, standAge, improveAge, level, lvlText, ts:Date.now() };
   const all = loadAll();
-  all.push({ name, email, date:mdate, age, total, riskPct, standAge, level, lvlText, ts:Date.now() });
+  all.push(record);
   saveAll(all);
+  lastRecord = record;   // メール送信用に保持
 
   // 点数経緯（今回を含めて描画）
   renderHistory(name);
@@ -667,6 +718,72 @@ function renderProducts(a, level){
       </div>
     </div>
   `).join("");
+}
+
+/* =========================================================
+   CSV書き出し（全記録）
+   ・Excelの文字化け防止にBOM付きUTF-8
+   ========================================================= */
+function exportCSV(){
+  const recs = loadAll();
+  if(!recs.length){ alert("書き出せる記録がありません。"); return; }
+  const cols = [
+    ["date","測定日"],["store","店舗名"],["staff","担当者名"],["name","お名前"],
+    ["email","メールアドレス"],["phone","電話番号"],["age","年齢"],
+    ["total","リスク点数"],["riskPct","転倒リスク(%)"],["standAge","立位年齢"],
+    ["improveAge","改善予測(歳)"],["lvlText","リスク判定"]
+  ];
+  const q = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const head = cols.map(c=>q(c[1])).join(",");
+  const rows = recs
+    .slice()
+    .sort((a,b)=> a.date===b.date ? a.ts-b.ts : (a.date<b.date?-1:1))
+    .map(r => cols.map(c=>q(r[c[0]])).join(","));
+  const csv = "﻿" + [head, ...rows].join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `marinecore_records_${today}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+/* =========================================================
+   結果をメールで送る（mailtoでメールアプリを起動）
+   ・宛先は入力メール、無ければ空欄（手入力）
+   ========================================================= */
+function mailResult(){
+  const r = lastRecord;
+  if(!r){ alert("先に診断を実行してください。"); return; }
+  const head = [
+    "MARINE CORE Balance 診断結果",
+    "──────────────",
+    `測定日：${fmtDate(r.date)}`,
+    r.store ? `店舗：${r.store}` : "",
+    r.staff ? `担当：${r.staff}` : "",
+    `お名前：${r.name} 様`,
+    r.phone ? `電話：${r.phone}` : ""
+  ].filter(Boolean).join("\n");
+  const score = [
+    `リスク判定：${r.lvlText}（${r.riskPct}%）`,
+    `リスク点数：${r.total} 点`,
+    `実年齢：${r.age} 歳 ／ 立位年齢：${r.standAge} 歳`,
+    `改善予測：${r.improveAge} 歳相当（継続ケア後）`
+  ].join("\n");
+  const foot = [
+    "▼ 詳しい診断・ご相談はこちら",
+    "https://naomimatsui.github.io/marinecore/",
+    "",
+    "※本結果は医療診断ではありません。日常の足元バランス確認の目安です。"
+  ].join("\n");
+  const L = [head, score, foot].join("\n\n");
+  const subject = `【MARINE CORE Balance】${r.name}様の診断結果（${fmtDate(r.date)}）`;
+  const href = `mailto:${encodeURIComponent(r.email||"")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(L)}`;
+  const a = document.createElement("a");
+  a.href = href;
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 /* もう一度診断する */
