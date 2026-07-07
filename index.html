@@ -197,6 +197,7 @@
   }
   .pinfo b{display:block;font-size:15px;font-weight:700}
   .pinfo p{margin:2px 0 0;font-size:12px;color:var(--gray);line-height:1.5}
+  .pprice{margin-top:5px;font-size:12px;font-weight:800;color:var(--accent)}
 
   .note{
     font-size:12px;color:var(--gray);text-align:center;line-height:1.6;
@@ -551,29 +552,29 @@
    ========================================================= */
 const PRODUCTS = [
   {
-    id:"short", name:"MARINE CORE ショート", tag:"普段履き",
-    desc:"普段履き・ビジネスシューズ向け。さりげなく足元を安定させる。",
-    fit:["daily","business"]
+    id:"corefix", name:"CORE FIX（コアフィックス）", tag:"一番人気", hero:true, price:7700,
+    desc:"MARINE COREの主役。硬いナイロン樹脂プレートで重心をカカトへ導き、体の軸のブレを抑える。ハーフサイズで違和感が少なく、普段履き・ビジネス・立ち仕事・営業まで幅広く。",
+    fit:["daily","business","posture","fall","longstand","walk"]
   },
   {
-    id:"basic", name:"MARINE CORE ベーシック", tag:"日常全般",
-    desc:"日常生活全般向け。姿勢と歩行の安定をサポート。",
+    id:"corefix_full", name:"CORE FIX フルサイズ", tag:"入れっぱなし派", price:null,
+    desc:"靴のインソールと丸ごと入れ替えるフルサイズ。中身のプレートはコアフィックスと同じ。1足に固定して使いたい人に。",
     fit:["daily","posture","fall"]
   },
   {
-    id:"mesh", name:"MARINE CORE メッシュ", tag:"アクティブ",
-    desc:"通気性重視。ウォーキング・スポーツ・長時間歩く人向け。",
+    id:"corefix_mesh", name:"CORE FIX メッシュ", tag:"通気性", price:null,
+    desc:"光が透けるほどのメッシュで通気性が高い。ウォーキング・スポーツ・長時間歩く人や夏場に。",
     fit:["active","longstand","walk"]
   },
   {
-    id:"corefix", name:"CORE FIX（芯材のみ）", tag:"OEM / 開発",
-    desc:"MARINE CORE中心技術の芯材。OEM・研究・開発・組み込み用途向け。",
-    fit:["oem"]
+    id:"corefix_leather", name:"CORE FIX ハイテク合皮", tag:"高級感", price:null,
+    desc:"布より高級感のある合皮仕上げ。営業・ビジネスカジュアルなど、靴の中がちらっと見えるシーンに。",
+    fit:["business","posture"]
   },
   {
-    id:"corefix_pumps", name:"CORE FIX PUMPS（芯材のみ）", tag:"パンプス専用",
-    desc:"パンプス専用芯材。約5cmまでのヒールに対応。",
-    fit:["pumps","oem"]
+    id:"corefix_pumps", name:"CORE FIX PUMPS（パンプス専用）", tag:"パンプス", price:null,
+    desc:"パンプス専用の芯材。約5cmまでのヒールに対応。パンプス勤務の方に。",
+    fit:["pumps","business"]
   }
 ];
 
@@ -938,34 +939,34 @@ function diagnose(){
   setTimeout(()=>{ gFill.style.strokeDasharray = `${score} 100`; }, 150); // ゲージ・アニメーション
 }
 
-/* おすすめ商品：回答からニーズを組み立ててスコアリング */
+/* おすすめ商品：主役(CORE FIX)を先頭に、回答ニーズに合う2番手を添える */
 function renderProducts(a, level){
   const needs = new Set(["daily"]);
   if(a.longstand){ needs.add("longstand"); needs.add("active"); needs.add("walk"); }
   if(a.stumble || a.onefoot || a.sway){ needs.add("fall"); needs.add("posture"); }
   if(a.pain){ needs.add("posture"); }
 
-  // 一般ユーザー向け（芯材のみ = OEM は提案から除外）
-  const consumer = PRODUCTS.filter(p => !p.fit.includes("oem"));
+  // 主役（CORE FIX）は常に先頭
+  const hero = PRODUCTS.find(p => p.hero) || PRODUCTS[0];
 
-  const scored = consumer.map(p=>{
-    let score = 0;
-    p.fit.forEach(f=>{ if(needs.has(f)) score++; });
-    if(level!=="low" && p.id==="basic") score += 1; // 中〜高リスクはベーシック優先
-    return {p, score};
-  }).sort((x,y)=> y.score - x.score);
+  // 主役以外から、ニーズに最も合う1点を2番手に
+  const second = PRODUCTS.filter(p => p !== hero)
+    .map(p => ({ p, s: p.fit.reduce((n,f)=> n + (needs.has(f) ? 1 : 0), 0) }))
+    .sort((x,y)=> y.s - x.s)[0].p;
 
-  const top = scored.slice(0,2).map(s=>s.p);
+  const top = [hero, second];
 
   const icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 15c2 0 3-1 5-1s3 2 6 2 4-2 4-4c0-1-1-2-3-2-3 0-4-3-7-3S4 9 4 12v3Z" stroke-linejoin="round"/></svg>`;
+  const yen = n => n ? `¥${n.toLocaleString()}（税込）` : "価格は公式サイト参照";
 
   document.getElementById("products").innerHTML = top.map((p,i)=>`
     <div class="product ${i===0?'top':''}">
       <div class="pthumb">${icon}</div>
       <div class="pinfo">
-        <span class="tag">${i===0 ? '★ 最適' : p.tag}</span>
+        <span class="tag">${i===0 ? '★ '+p.tag : p.tag}</span>
         <b>${p.name}</b>
         <p>${p.desc}</p>
+        <div class="pprice">${yen(p.price)}</div>
       </div>
     </div>
   `).join("");
