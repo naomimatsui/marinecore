@@ -8,7 +8,7 @@
   :root{
     --navy:#12233b; --navy-soft:#13385f; --blue:#eaf2fc; --blue-mid:#cfe4fa;
     --accent:#2f6bf0; --accent-ink:#2159d6; --gray:#8b95a6; --gray-soft:#f4f6fa;
-    --line:#eceff4; --white:#ffffff; --low:#25b485; --high:#e2604b;
+    --line:#eceff4; --white:#ffffff; --low:#25b485; --mid:#eaa53a; --high:#e2604b;
     --radius:20px; --shadow:0 10px 30px rgba(10,37,64,.10);
   }
   *{box-sizing:border-box}
@@ -109,6 +109,14 @@
   .badge.est{background:#f0ede8;color:#977c46}
   .mchange{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--navy-soft)}
   .mchange .good{color:var(--low)}
+  .verdict{font-style:normal;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px}
+  .verdict.good{background:#e4f6ef;color:#1c8f68}
+  .verdict.warn{background:#fdf1dd;color:#a9761f}
+  .verdict.bad{background:#fdeae6;color:#c0392b}
+  .bar.good .segA{background:var(--low)} .bar.good .segB{background:#b6e6d6}
+  .bar.warn .segA{background:var(--mid)} .bar.warn .segB{background:#f3d59a}
+  .bar.bad .segA{background:var(--high)} .bar.bad .segB{background:#f0b6ab}
+  .mref{margin-top:7px;font-size:11px;color:var(--gray)}
 
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
@@ -323,11 +331,14 @@
     if(autoStats[phase]) return {v:autoStats[phase][key], src:'目安'};
     return null;
   }
-  function bar(x,y){ return `<span class="bar"><span class="seg segA" style="width:${x}%"></span><span class="seg segB" style="width:${y}%"></span></span>`; }
-  function phaseRow(name,m,a,b){
+  function bar(x,y,cls){ return `<span class="bar ${cls||''}"><span class="seg segA" style="width:${x}%"></span><span class="seg segB" style="width:${y}%"></span></span>`; }
+  function verdictLR(v){ const d=Math.abs(v[0]-v[1]); if(d<=10) return {t:'良好',c:'good'}; if(d<=20) return {t:'やや偏り',c:'warn'}; return {t:'偏り',c:'bad'}; }
+  function phaseRow(name,m,a,b,key){
     if(!m) return `<div class="prow"><span class="pn">${name}</span><span class="pv" style="color:var(--gray)">—</span></div>`;
-    const x=Math.round(m.v[0]), y=100-Math.round(m.v[0]);
-    return `<div class="prow"><span class="pn">${name}</span>${bar(x,y)}<span class="pv">${a}${x}% / ${b}${y}%<em class="badge ${m.src==='測定値'?'meas':'est'}">${m.src}</em></span></div>`;
+    const x=Math.round(m.v[0]), y=100-x;
+    let vchip='', bcls='';
+    if(key==='lr'){ const vv=verdictLR(m.v); vchip=`<em class="verdict ${vv.c}">${vv.t}</em>`; bcls=vv.c; }
+    return `<div class="prow"><span class="pn">${name}</span>${bar(x,y,bcls)}<span class="pv">${a}${x}% / ${b}${y}%<em class="badge ${m.src==='測定値'?'meas':'est'}">${m.src}</em>${vchip}</span></div>`;
   }
   function renderAnalysis(){
     const wrap=document.getElementById('anaWrap');
@@ -337,12 +348,15 @@
       const bf=getMetric('before',key), af=getMetric('after',key);
       if(!bf && !af) return;
       if((bf&&bf.src==='目安')||(af&&af.src==='目安')) usedEst=true;
-      html+=`<div class="metric"><div class="mlabel">${label}</div>${phaseRow('装着前',bf,a,b)}${phaseRow('装着後',af,a,b)}`;
+      html+=`<div class="metric"><div class="mlabel">${label}</div>${phaseRow('装着前',bf,a,b,key)}${phaseRow('装着後',af,a,b,key)}`;
       if(bf&&af){
         const d0=Math.round(Math.abs(bf.v[0]-bf.v[1])), d1=Math.round(Math.abs(af.v[0]-af.v[1]));
         const good = d1<d0;
         html+=`<div class="mchange">${a}${b}差：${d0}% → ${d1}%${good?' <span class="good">（より均等に）</span>':''}</div>`;
       }
+      html+= (key==='lr')
+        ? '<div class="mref">参考：左右差 10%以内＝良好／10〜20%＝やや偏り／20%超＝偏り（文献上の一般的な目安。診断ではありません）</div>'
+        : '<div class="mref">参考：立位では 前足部40%／後足部60% 前後が一般的な目安</div>';
       html+='</div>';
     });
     if(html){ wrap.style.display=''; document.getElementById('anaBody').innerHTML=html;
