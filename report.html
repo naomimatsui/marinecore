@@ -21,7 +21,8 @@
   header.top{display:flex;align-items:center;justify-content:space-between;
     padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:10px}
-  .logo{width:38px;height:26px;display:block}
+  .logo{width:38px;height:26px;display:block;object-fit:contain}
+  .logo.white{filter:brightness(0) invert(1)}
   .brand b{font-size:16px;letter-spacing:.02em}
   .brand span.sub{font-size:11px;color:var(--gray);display:block;font-weight:400;letter-spacing:.08em}
   .back{color:var(--accent);text-decoration:none;font-weight:700;font-size:14px}
@@ -172,10 +173,7 @@
 
 <header class="top no-print">
   <div class="brand">
-    <svg class="logo" viewBox="0 0 38 26" aria-label="MARINE CORE"><defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#12233b"/><stop offset="1" stop-color="#2f6bf0"/></linearGradient></defs>
-      <path fill="url(#g)" d="M2 20c6 0 8-6 14-6 4 0 6 3 10 3 3 0 5-2 5-2 0 6-6 9-12 9C10 24 2 20 2 20Zm5-7C10 8 15 4 22 4c5 0 9 3 11 7-2-1-4-2-7-2-6 0-8 5-13 5-3 0-6-1-6-1Z"/></svg>
+    <img class="logo" src="logo.png" alt="MARINE CORE">
     <div><b>MARINE CORE</b><span class="sub">FOOT PRESSURE REPORT</span></div>
   </div>
   <a class="back" href="index.html">← アプリへ</a>
@@ -267,7 +265,7 @@
   <section class="report card">
     <div class="rband">
       <div class="t"><b>足圧レポート</b><span>FOOT PRESSURE REPORT</span></div>
-      <svg class="logo" viewBox="0 0 38 26" style="width:44px;height:30px"><path fill="#fff" d="M2 20c6 0 8-6 14-6 4 0 6 3 10 3 3 0 5-2 5-2 0 6-6 9-12 9C10 24 2 20 2 20Zm5-7C10 8 15 4 22 4c5 0 9 3 11 7-2-1-4-2-7-2-6 0-8 5-13 5-3 0-6-1-6-1Z"/></svg>
+      <img class="logo white" src="logo.png" alt="MARINE CORE" style="width:44px;height:30px">
     </div>
     <div class="rbody">
       <div class="meta">
