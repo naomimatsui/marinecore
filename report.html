@@ -137,6 +137,15 @@
   .sline b{display:block;color:var(--gray);font-weight:700;font-size:11px;margin-bottom:1px}
   .sline.mc b{color:var(--accent-ink)}
 
+  /* MARINE COREの考え方（3点支持） */
+  .mcphil{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .mcphil .mchead{background:var(--navy);color:#fff;font-weight:800;font-size:14px;padding:9px 16px}
+  .mcphil .mcbody{padding:14px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .mcphil .mcdiag{flex:none}
+  .mcphil .mctext{flex:1;min-width:210px;font-size:13px;line-height:1.75}
+  .mcphil .mctext b{color:var(--accent-ink)}
+  .mcphil .mcnote{display:block;margin-top:8px;font-size:11px;color:var(--gray);line-height:1.5}
+
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
   .comment b{display:block;font-size:12px;color:var(--accent-ink);margin-bottom:4px}
@@ -281,6 +290,26 @@
       <div class="state" id="stateWrap" style="display:none">
         <div class="shead">あなたの足の状態（参考）</div>
         <div id="stateBody"></div>
+      </div>
+
+      <div class="mcphil">
+        <div class="mchead">MARINE COREの考え方（3点支持）</div>
+        <div class="mcbody">
+          <svg class="mcdiag" width="108" height="146" viewBox="0 0 108 146" role="img" aria-label="足裏の3点支持と3つのアーチ">
+            <path d="M54 6 C76 6 90 24 90 56 C90 82 82 102 78 120 C75 134 66 142 54 142 C42 142 33 134 30 120 C26 102 18 82 18 56 C18 24 32 6 54 6 Z" fill="#eef3fa" stroke="#cfe0f4"/>
+            <line x1="38" y1="46" x2="80" y2="52" stroke="#2f6bf0" stroke-width="2" stroke-dasharray="3 3"/>
+            <line x1="38" y1="46" x2="54" y2="122" stroke="#2f6bf0" stroke-width="2" stroke-dasharray="3 3"/>
+            <line x1="80" y1="52" x2="54" y2="122" stroke="#2f6bf0" stroke-width="2" stroke-dasharray="3 3"/>
+            <circle cx="38" cy="46" r="9" fill="#e2604b"/>
+            <circle cx="80" cy="52" r="9" fill="#e2604b"/>
+            <circle cx="54" cy="122" r="9" fill="#e2604b"/>
+            <text x="54" y="140" text-anchor="middle" font-size="8.5" fill="#8b95a6">3点＝3アーチ</text>
+          </svg>
+          <div class="mctext">
+            足裏には、体を支える<b>3つの点</b>があります。<b>かかと</b>・<b>親指の付け根（母趾球）</b>・<b>小指の付け根（小趾球）</b>。この3点が支えられると、その3点を結ぶ<b>内側縦・外側縦・横</b>の“3つのアーチ”が働き、指まで自然に接地しやすくなります。<b>MARINE CORE</b>は、この3点を下から支えることを目指した設計です。
+            <span class="mcnote">※装着後の足圧では、この3点に圧が分散し、指の接地が増えているかが目安になります。本製品は医療機器ではなく、疾患の診断・治療・予防を目的とするものではありません。足圧は測定時の一例で、効果を保証するものではありません。</span>
+          </div>
+        </div>
       </div>
 
       <div class="comment" id="oCommentWrap" style="display:none"><b>コメント</b><span id="oComment"></span></div>
