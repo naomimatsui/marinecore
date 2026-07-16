@@ -54,7 +54,7 @@
   /* manual analysis inputs */
   .anin{background:var(--gray-soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
   .anrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin:6px 0}
-  .anrow b{width:56px}
+  .anrow b{width:104px;white-space:nowrap}
   .anrow .mini{width:60px;font-size:15px;padding:8px 8px;border:1px solid var(--line);
     border-radius:10px;background:#fff;text-align:center;font-family:inherit}
 
@@ -97,7 +97,7 @@
   .metric:last-child{border-bottom:none}
   .mlabel{font-weight:800;font-size:14px;margin-bottom:8px}
   .prow{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px;flex-wrap:wrap}
-  .prow .pn{width:52px;color:var(--gray);font-weight:700;flex:none}
+  .prow .pn{width:112px;color:var(--gray);font-weight:700;flex:none;white-space:nowrap}
   .bar{flex:1;min-width:140px;height:16px;border-radius:8px;overflow:hidden;display:flex;
     border:1px solid var(--line)}
   .seg{height:100%}
@@ -201,7 +201,7 @@
           <span class="clearimg" id="clrBefore" style="display:none" onclick="clearImg('before')">画像を消す</span>
         </div>
         <div class="up">
-          <label>装着後 <span class="hint">任意</span></label>
+          <label>マリンコア装着後 <span class="hint">任意</span></label>
           <div class="drop" onclick="pick('after')" id="dropAfter"><span>タップして画像を選択</span></div>
           <input type="file" accept="image/*" id="fileAfter" onchange="loadImg(this,'after')" style="display:none">
           <span class="clearimg" id="clrAfter" style="display:none" onclick="clearImg('after')">画像を消す</span>
@@ -213,7 +213,7 @@
       <label>分析の数値 <span class="hint">機器の数値があれば入力（空欄なら画像から目安を自動計算）</span></label>
       <div class="anin">
         <div class="anrow"><b>装着前</b>左右：左<input class="mini" id="lbefore" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fbefore" type="number" min="0" max="100" oninput="update()">%</div>
-        <div class="anrow"><b>装着後</b>左右：左<input class="mini" id="lafter" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fafter" type="number" min="0" max="100" oninput="update()">%</div>
+        <div class="anrow"><b>マリンコア装着後</b>左右：左<input class="mini" id="lafter" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fafter" type="number" min="0" max="100" oninput="update()">%</div>
       </div>
     </div>
 
@@ -237,7 +237,7 @@
     </div>
 
     <div class="field"><label>ひとことコメント <span class="hint">任意</span></label>
-      <textarea id="comment" class="num" placeholder="例）装着後は前足部への荷重が分散し、指の接地が増えています。" oninput="update()"></textarea></div>
+      <textarea id="comment" class="num" placeholder="例）マリンコア装着後は前足部への荷重が分散し、指の接地が増えています。" oninput="update()"></textarea></div>
   </section>
 
   <section class="report card">
@@ -255,7 +255,7 @@
 
       <div class="scans">
         <div class="scan before"><span class="chip">装着前</span><div class="imgbox empty" id="boxBefore">画像なし</div></div>
-        <div class="scan after"><span class="chip">装着後</span><div class="imgbox empty" id="boxAfter">画像なし</div></div>
+        <div class="scan after"><span class="chip">マリンコア装着後</span><div class="imgbox empty" id="boxAfter">画像なし</div></div>
       </div>
 
       <div class="ana" id="anaWrap" style="display:none">
@@ -443,7 +443,7 @@
       const bf=getMetric('before',key), af=getMetric('after',key);
       if(!bf && !af) return;
       if((bf&&bf.src==='目安')||(af&&af.src==='目安')) usedEst=true;
-      html+=`<div class="metric"><div class="mlabel">${label}</div>${phaseRow('装着前',bf,a,b,key)}${phaseRow('装着後',af,a,b,key)}`;
+      html+=`<div class="metric"><div class="mlabel">${label}</div>${phaseRow('装着前',bf,a,b,key)}${phaseRow('マリンコア装着後',af,a,b,key)}`;
       if(bf&&af){
         const d0=Math.round(Math.abs(bf.v[0]-bf.v[1])), d1=Math.round(Math.abs(af.v[0]-af.v[1]));
         const good = d1<d0;
