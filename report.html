@@ -8,7 +8,7 @@
   :root{
     --navy:#12233b; --navy-soft:#13385f; --blue:#eaf2fc; --blue-mid:#cfe4fa;
     --accent:#2f6bf0; --accent-ink:#2159d6; --gray:#8b95a6; --gray-soft:#f4f6fa;
-    --line:#eceff4; --white:#ffffff;
+    --line:#eceff4; --white:#ffffff; --low:#25b485; --high:#e2604b;
     --radius:20px; --shadow:0 10px 30px rgba(10,37,64,.10);
   }
   *{box-sizing:border-box}
@@ -18,21 +18,15 @@
     color:var(--navy); background:var(--gray-soft); line-height:1.7;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
-
-  /* ---- header ---- */
-  header.top{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 18px;background:#fff;border-bottom:1px solid var(--line);
-  }
+  header.top{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
   .brand{display:flex;align-items:center;gap:10px}
   .logo{width:38px;height:26px;display:block}
   .brand b{font-size:16px;letter-spacing:.02em}
   .brand span.sub{font-size:11px;color:var(--gray);display:block;font-weight:400;letter-spacing:.08em}
   .back{color:var(--accent);text-decoration:none;font-weight:700;font-size:14px}
-
   .wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}
 
-  /* ---- cards / form ---- */
   .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
     padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
   h1{font-size:22px;margin:0 0 6px}
@@ -48,7 +42,6 @@
   .row2{display:flex;gap:14px;flex-wrap:wrap}
   .row2 .field{flex:1;min-width:180px}
 
-  /* ---- upload ---- */
   .uploads{display:flex;gap:14px;flex-wrap:wrap}
   .up{flex:1;min-width:200px}
   .up label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
@@ -56,8 +49,14 @@
     min-height:150px;display:flex;align-items:center;justify-content:center;
     text-align:center;color:var(--gray);font-size:13px;cursor:pointer;overflow:hidden;padding:8px}
   .drop img{max-width:100%;max-height:230px;border-radius:10px;display:block}
-  .drop input{display:none}
   .clearimg{margin-top:6px;font-size:12px;color:var(--accent);cursor:pointer;display:inline-block}
+
+  /* manual analysis inputs */
+  .anin{background:var(--gray-soft);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .anrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin:6px 0}
+  .anrow b{width:56px}
+  .anrow .mini{width:60px;font-size:15px;padding:8px 8px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;text-align:center;font-family:inherit}
 
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
     border:none;cursor:pointer;font-family:inherit;font-size:16px;font-weight:700;
@@ -68,13 +67,12 @@
   .btn.ghost{background:var(--gray-soft);color:var(--navy);box-shadow:none;border:1px solid var(--line)}
   .btnrow{display:flex;gap:10px;margin-top:6px}
 
-  /* ---- report preview ---- */
+  /* report */
   .report{padding:0;overflow:hidden}
   .rband{background:linear-gradient(135deg,var(--navy) 0%,var(--accent) 100%);color:#fff;
     padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .rband .t b{font-size:19px;letter-spacing:.04em}
   .rband .t span{display:block;font-size:12px;opacity:.85;letter-spacing:.14em;margin-top:2px}
-  .rband .logo path{fill:#fff!important}
   .rbody{padding:22px 24px}
   .meta{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px;font-size:14px}
   .meta div span{color:var(--gray);font-size:12px;display:block}
@@ -89,6 +87,29 @@
     min-height:240px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px}
   .scan .imgbox img{max-width:100%;max-height:320px;display:block}
   .scan .imgbox.empty{color:var(--gray);font-size:13px}
+
+  /* analysis in report */
+  .ana{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .ana .ahead{background:var(--navy);color:#fff;font-weight:800;font-size:14px;padding:9px 16px;
+    display:flex;justify-content:space-between;align-items:center}
+  .ana .ahead .est{font-size:11px;font-weight:600;opacity:.8}
+  .metric{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .metric:last-child{border-bottom:none}
+  .mlabel{font-weight:800;font-size:14px;margin-bottom:8px}
+  .prow{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px;flex-wrap:wrap}
+  .prow .pn{width:52px;color:var(--gray);font-weight:700;flex:none}
+  .bar{flex:1;min-width:140px;height:16px;border-radius:8px;overflow:hidden;display:flex;
+    border:1px solid var(--line)}
+  .seg{height:100%}
+  .segA{background:var(--accent)}
+  .segB{background:var(--blue-mid)}
+  .pv{font-size:12px;font-weight:700;white-space:nowrap}
+  .badge{font-style:normal;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:5px}
+  .badge.meas{background:var(--blue);color:var(--accent-ink)}
+  .badge.est{background:#f0ede8;color:#977c46}
+  .mchange{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--navy-soft)}
+  .mchange .good{color:var(--low)}
+
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
   .comment b{display:block;font-size:12px;color:var(--accent-ink);margin-bottom:4px}
@@ -97,24 +118,17 @@
   .rfoot .co{font-size:13px;color:var(--gray)}
   .rfoot .co b{color:var(--navy)}
   .note{font-size:10.5px;color:var(--gray);line-height:1.5;max-width:520px}
-
   .toolbar{padding:16px 24px;border-top:1px solid var(--line);background:#fff}
 
-  @media (max-width:520px){
-    .rband{padding:16px}
-    .rbody{padding:16px}
-  }
-
-  /* ---- print ---- */
+  @media (max-width:520px){.rband{padding:16px}.rbody{padding:16px}}
   @page{size:A4;margin:12mm}
   @media print{
     body{background:#fff}
     .no-print{display:none!important}
     .wrap{max-width:none;padding:0}
     .report{box-shadow:none;border:none;margin:0;border-radius:0}
-    .scan .imgbox{min-height:0}
-    .scan .imgbox img{max-height:340px}
-    .scans,.rfoot{page-break-inside:avoid}
+    .scan .imgbox{min-height:0}.scan .imgbox img{max-height:300px}
+    .scans,.rfoot,.metric{page-break-inside:avoid}
   }
 </style>
 </head>
@@ -133,10 +147,9 @@
 
 <div class="wrap">
 
-  <!-- 入力エリア（印刷されない） -->
   <section class="card no-print">
     <h1>足圧レポートを作成</h1>
-    <p class="lead">Sennoscan で書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
+    <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="row2">
       <div class="field"><label>お客様名 <span class="hint">任意</span></label>
@@ -157,7 +170,7 @@
     </div>
 
     <div class="field">
-      <label>足圧画像の読み込み <span class="hint">Sennoscanから書き出した画像を選択</span></label>
+      <label>足圧画像の読み込み <span class="hint">書き出した画像を選択（左右・前後の目安を自動分析します）</span></label>
       <div class="uploads">
         <div class="up">
           <label>装着前</label>
@@ -174,15 +187,22 @@
       </div>
     </div>
 
+    <div class="field">
+      <label>分析の数値 <span class="hint">機器の数値があれば入力（空欄なら画像から目安を自動計算）</span></label>
+      <div class="anin">
+        <div class="anrow"><b>装着前</b>左右：左<input class="mini" id="lbefore" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fbefore" type="number" min="0" max="100" oninput="update()">%</div>
+        <div class="anrow"><b>装着後</b>左右：左<input class="mini" id="lafter" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fafter" type="number" min="0" max="100" oninput="update()">%</div>
+      </div>
+    </div>
+
     <div class="field"><label>ひとことコメント <span class="hint">任意</span></label>
       <textarea id="comment" class="num" placeholder="例）装着後は前足部への荷重が分散し、指の接地が増えています。" oninput="update()"></textarea></div>
   </section>
 
-  <!-- レポート本体（画面表示＆印刷される） -->
   <section class="report card">
     <div class="rband">
       <div class="t"><b>足圧レポート</b><span>FOOT PRESSURE REPORT</span></div>
-      <svg class="logo" viewBox="0 0 38 26" style="width:44px;height:30px"><path d="M2 20c6 0 8-6 14-6 4 0 6 3 10 3 3 0 5-2 5-2 0 6-6 9-12 9C10 24 2 20 2 20Zm5-7C10 8 15 4 22 4c5 0 9 3 11 7-2-1-4-2-7-2-6 0-8 5-13 5-3 0-6-1-6-1Z"/></svg>
+      <svg class="logo" viewBox="0 0 38 26" style="width:44px;height:30px"><path fill="#fff" d="M2 20c6 0 8-6 14-6 4 0 6 3 10 3 3 0 5-2 5-2 0 6-6 9-12 9C10 24 2 20 2 20Zm5-7C10 8 15 4 22 4c5 0 9 3 11 7-2-1-4-2-7-2-6 0-8 5-13 5-3 0-6-1-6-1Z"/></svg>
     </div>
     <div class="rbody">
       <div class="meta">
@@ -193,23 +213,20 @@
       </div>
 
       <div class="scans">
-        <div class="scan before">
-          <span class="chip">装着前</span>
-          <div class="imgbox empty" id="boxBefore">画像なし</div>
-        </div>
-        <div class="scan after">
-          <span class="chip">装着後</span>
-          <div class="imgbox empty" id="boxAfter">画像なし</div>
-        </div>
+        <div class="scan before"><span class="chip">装着前</span><div class="imgbox empty" id="boxBefore">画像なし</div></div>
+        <div class="scan after"><span class="chip">装着後</span><div class="imgbox empty" id="boxAfter">画像なし</div></div>
       </div>
 
-      <div class="comment" id="oCommentWrap" style="display:none">
-        <b>コメント</b><span id="oComment"></span>
+      <div class="ana" id="anaWrap" style="display:none">
+        <div class="ahead"><span>足圧バランス分析</span><span class="est" id="anaSrcNote"></span></div>
+        <div id="anaBody"></div>
       </div>
+
+      <div class="comment" id="oCommentWrap" style="display:none"><b>コメント</b><span id="oComment"></span></div>
 
       <div class="rfoot">
         <div class="co"><b>MARINE CORE</b> ／ 株式会社アドニス　足元バランスの新基準</div>
-        <div class="note">※本製品は医療機器ではありません。疾患の診断・治療・予防を目的とするものではなく、足裏支持および歩行時の安定性を補助するフットウェア製品です。足圧画像は測定時の一例であり、効果を保証するものではありません。</div>
+        <div class="note">※本製品は医療機器ではありません。疾患の診断・治療・予防を目的とするものではなく、足裏支持および歩行時の安定性を補助するフットウェア製品です。足圧画像・数値は測定時の一例で、効果を保証するものではありません。「目安」は画像の色から推定した参考値（つま先が上の向きを想定）で、測定機器の正式値とは異なります。</div>
       </div>
     </div>
 
@@ -224,53 +241,122 @@
 
 <script>
   const imgs = {before:null, after:null};
+  const autoStats = {before:null, after:null};   // 画像からの目安 {lr:[l,r], fb:[f,b]}
 
-  // 今日の日付を初期値に
   (function(){
-    const d = new Date();
-    const p = n => String(n).padStart(2,'0');
+    const d = new Date(), p = n => String(n).padStart(2,'0');
     document.getElementById('date').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
     update();
   })();
 
-  function pick(which){ document.getElementById('file'+cap(which)).click(); }
   function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function pick(which){ document.getElementById('file'+cap(which)).click(); }
 
   function loadImg(input, which){
-    const f = input.files && input.files[0];
-    if(!f) return;
+    const f = input.files && input.files[0]; if(!f) return;
     const r = new FileReader();
     r.onload = e => {
       imgs[which] = e.target.result;
-      // 入力エリアのプレビュー
       document.getElementById('drop'+cap(which)).innerHTML = '<img src="'+e.target.result+'">';
       document.getElementById('clr'+cap(which)).style.display = 'inline-block';
+      const im = new Image();
+      im.onload = () => { autoStats[which] = analyzeImage(im); update(); };
+      im.src = e.target.result;
       update();
     };
     r.readAsDataURL(f);
   }
 
   function clearImg(which){
-    imgs[which] = null;
+    imgs[which] = null; autoStats[which] = null;
     document.getElementById('file'+cap(which)).value = '';
     document.getElementById('drop'+cap(which)).innerHTML = '<span>タップして画像を選択</span>';
     document.getElementById('clr'+cap(which)).style.display = 'none';
     update();
   }
 
-  function esc(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
-  function fmtDate(v){
-    if(!v) return '—';
-    const [y,m,d] = v.split('-'); return `${y}年${Number(m)}月${Number(d)}日`;
+  /* 画像の色→圧力の目安。左右／前後（上下）の重み比を推定 */
+  function analyzeImage(img){
+    try{
+      const W = 240, sc = W / img.naturalWidth, H = Math.max(1, Math.round(img.naturalHeight*sc));
+      const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+      const ctx = cv.getContext('2d'); ctx.drawImage(img,0,0,W,H);
+      const d = ctx.getImageData(0,0,W,H).data;
+      let L=0,R=0,T=0,B=0,tot=0;
+      for(let y=0;y<H;y++){
+        for(let x=0;x<W;x++){
+          const i=(y*W+x)*4, w=px2weight(d[i],d[i+1],d[i+2]);
+          if(w<=0) continue;
+          tot+=w;
+          if(x < W/2) L+=w; else R+=w;
+          if(y < H/2) T+=w; else B+=w;
+        }
+      }
+      if(tot<=0) return null;
+      return { lr:[L/tot*100, R/tot*100], fb:[T/tot*100, B/tot*100] };
+    }catch(e){ return null; }
+  }
+  /* 色→圧力の重み（赤=強い…青=弱い、背景/白/灰は除外） */
+  function px2weight(r,g,b){
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), v=mx/255, d=mx-mn;
+    const s = mx===0?0:d/mx;
+    if(s<0.25 || v<0.20) return 0;      // 無彩色・背景を除外
+    let h;
+    if(d===0) h=0;
+    else if(mx===r) h=(((g-b)/d)%6+6)%6;
+    else if(mx===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h*=60;
+    let w = (h<=240) ? (1 - (h/240)*0.95) : 0.9;  // 赤→1, 青→0.05, 桃→0.9
+    return w * v;
   }
 
+  function numVal(id){
+    const el=document.getElementById(id); if(!el) return null;
+    const t=el.value.trim(); if(t==='') return null;
+    const n=Number(t); if(isNaN(n)||n<0||n>100) return null; return n;
+  }
+  function getMetric(phase, key){
+    const manId = (key==='lr'?'l':'f')+phase;
+    const m = numVal(manId);
+    if(m!=null) return {v:[m,100-m], src:'測定値'};
+    if(autoStats[phase]) return {v:autoStats[phase][key], src:'目安'};
+    return null;
+  }
+  function bar(x,y){ return `<span class="bar"><span class="seg segA" style="width:${x}%"></span><span class="seg segB" style="width:${y}%"></span></span>`; }
+  function phaseRow(name,m,a,b){
+    if(!m) return `<div class="prow"><span class="pn">${name}</span><span class="pv" style="color:var(--gray)">—</span></div>`;
+    const x=Math.round(m.v[0]), y=100-Math.round(m.v[0]);
+    return `<div class="prow"><span class="pn">${name}</span>${bar(x,y)}<span class="pv">${a}${x}% / ${b}${y}%<em class="badge ${m.src==='測定値'?'meas':'est'}">${m.src}</em></span></div>`;
+  }
+  function renderAnalysis(){
+    const wrap=document.getElementById('anaWrap');
+    const defs=[['lr','左右バランス','左','右'],['fb','前後バランス','前','後']];
+    let html=''; let usedEst=false;
+    defs.forEach(([key,label,a,b])=>{
+      const bf=getMetric('before',key), af=getMetric('after',key);
+      if(!bf && !af) return;
+      if((bf&&bf.src==='目安')||(af&&af.src==='目安')) usedEst=true;
+      html+=`<div class="metric"><div class="mlabel">${label}</div>${phaseRow('装着前',bf,a,b)}${phaseRow('装着後',af,a,b)}`;
+      if(bf&&af){
+        const d0=Math.round(Math.abs(bf.v[0]-bf.v[1])), d1=Math.round(Math.abs(af.v[0]-af.v[1]));
+        const good = d1<d0;
+        html+=`<div class="mchange">${a}${b}差：${d0}% → ${d1}%${good?' <span class="good">（より均等に）</span>':''}</div>`;
+      }
+      html+='</div>';
+    });
+    if(html){ wrap.style.display=''; document.getElementById('anaBody').innerHTML=html;
+      document.getElementById('anaSrcNote').textContent = usedEst ? '「目安」＝画像からの参考値' : ''; }
+    else wrap.style.display='none';
+  }
+
+  function esc(s){ return (s||''); }
+  function fmtDate(v){ if(!v) return '—'; const [y,m,d]=v.split('-'); return `${y}年${Number(m)}月${Number(d)}日`; }
+
   function update(){
-    const name = document.getElementById('name').value.trim();
-    const staff = document.getElementById('staff').value.trim();
-    const comment = document.getElementById('comment').value.trim();
-    document.getElementById('oName').textContent = name || '—';
-    document.getElementById('oStaff').textContent = staff || '—';
-    document.getElementById('oDate').textContent = fmtDate(document.getElementById('date').value);
+    document.getElementById('oName').textContent  = document.getElementById('name').value.trim() || '—';
+    document.getElementById('oStaff').textContent = document.getElementById('staff').value.trim() || '—';
+    document.getElementById('oDate').textContent  = fmtDate(document.getElementById('date').value);
 
     const device = document.getElementById('device').value;
     const dw = document.getElementById('oDeviceWrap');
@@ -279,21 +365,21 @@
 
     setBox('boxBefore', imgs.before);
     setBox('boxAfter',  imgs.after);
+    renderAnalysis();
 
+    const comment = document.getElementById('comment').value.trim();
     const cw = document.getElementById('oCommentWrap');
     if(comment){ cw.style.display='block'; document.getElementById('oComment').textContent = comment; }
     else cw.style.display='none';
   }
-
   function setBox(id, data){
     const box = document.getElementById(id);
     if(data){ box.classList.remove('empty'); box.innerHTML = '<img src="'+data+'">'; }
     else { box.classList.add('empty'); box.textContent = '画像なし'; }
   }
-
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
-    ['name','staff','comment'].forEach(id=>document.getElementById(id).value='');
+    ['name','staff','comment','lbefore','fbefore','lafter','fafter'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
     clearImg('before'); clearImg('after');
     update();
