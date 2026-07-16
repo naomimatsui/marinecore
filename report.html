@@ -144,8 +144,17 @@
       <div class="field"><label>測定日</label>
         <input id="date" class="num" type="date" oninput="update()"></div>
     </div>
-    <div class="field"><label>店舗・担当 <span class="hint">任意</span></label>
-      <input id="staff" class="num" placeholder="例）ADONIS ○○店 / 担当：おみ" oninput="update()"></div>
+    <div class="row2">
+      <div class="field"><label>店舗・担当 <span class="hint">任意</span></label>
+        <input id="staff" class="num" placeholder="例）ADONIS ○○店 / 担当：おみ" oninput="update()"></div>
+      <div class="field"><label>測定機器</label>
+        <select id="device" class="num" onchange="update()">
+          <option value="ADONIS足圧計">ADONIS足圧計</option>
+          <option value="Aetrex Albert">Aetrex Albert</option>
+          <option value="その他">その他</option>
+          <option value="">記載しない</option>
+        </select></div>
+    </div>
 
     <div class="field">
       <label>足圧画像の読み込み <span class="hint">Sennoscanから書き出した画像を選択</span></label>
@@ -180,6 +189,7 @@
         <div><span>お客様</span><b id="oName">—</b></div>
         <div><span>測定日</span><b id="oDate">—</b></div>
         <div><span>店舗・担当</span><b id="oStaff">—</b></div>
+        <div id="oDeviceWrap"><span>測定機器</span><b id="oDevice">—</b></div>
       </div>
 
       <div class="scans">
@@ -262,6 +272,11 @@
     document.getElementById('oStaff').textContent = staff || '—';
     document.getElementById('oDate').textContent = fmtDate(document.getElementById('date').value);
 
+    const device = document.getElementById('device').value;
+    const dw = document.getElementById('oDeviceWrap');
+    if(device){ dw.style.display=''; document.getElementById('oDevice').textContent = device; }
+    else dw.style.display='none';
+
     setBox('boxBefore', imgs.before);
     setBox('boxAfter',  imgs.after);
 
@@ -279,6 +294,7 @@
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
     ['name','staff','comment'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('device').value='ADONIS足圧計';
     clearImg('before'); clearImg('after');
     update();
   }
