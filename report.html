@@ -218,17 +218,17 @@
     </div>
 
     <div class="field">
-      <label>足のタイプ判定 <span class="hint">機器の判定やおみの見立てを選択（任意・レポートに説明が出ます）</span></label>
+      <label>足のタイプ判定 <span class="hint">画像を入れると自動で目安が入ります／手で選べば上書き</span></label>
       <div class="row2">
         <div class="field" style="margin-bottom:0"><label style="font-size:13px">アーチ</label>
-          <select id="arch" class="num" onchange="update()">
+          <select id="arch" class="num" onchange="autoType.arch=false;update()">
             <option value="">未評価</option>
             <option value="正常">正常</option>
             <option value="扁平">扁平足の傾向（低アーチ）</option>
             <option value="ハイアーチ">ハイアーチの傾向（高アーチ）</option>
           </select></div>
         <div class="field" style="margin-bottom:0"><label style="font-size:13px">浮き指</label>
-          <select id="floattoe" class="num" onchange="update()">
+          <select id="floattoe" class="num" onchange="autoType.toe=false;update()">
             <option value="">未評価</option>
             <option value="なし">該当なし</option>
             <option value="あり">傾向あり</option>
@@ -287,7 +287,8 @@
 
 <script>
   const imgs = {before:null, after:null};
-  const autoStats = {before:null, after:null};   // 画像からの目安 {lr:[l,r], fb:[f,b]}
+  const autoStats = {before:null, after:null};   // 画像からの目安 {lr,fb,arch,toe}
+  const autoType  = {arch:false, toe:false};      // タイプ欄を画像から自動入力したか
 
   (function(){
     const d = new Date(), p = n => String(n).padStart(2,'0');
@@ -306,7 +307,7 @@
       document.getElementById('drop'+cap(which)).innerHTML = '<img src="'+e.target.result+'">';
       document.getElementById('clr'+cap(which)).style.display = 'inline-block';
       const im = new Image();
-      im.onload = () => { autoStats[which] = analyzeImage(im); update(); };
+      im.onload = () => { autoStats[which] = analyzeImage(im); applyAutoType(); update(); };
       im.src = e.target.result;
       update();
     };
@@ -318,7 +319,21 @@
     document.getElementById('file'+cap(which)).value = '';
     document.getElementById('drop'+cap(which)).innerHTML = '<span>タップして画像を選択</span>';
     document.getElementById('clr'+cap(which)).style.display = 'none';
+    // 画像が無くなったら自動入力したタイプ欄も戻す
+    if(!imgs.before && !imgs.after){
+      if(autoType.arch){ document.getElementById('arch').value=''; autoType.arch=false; }
+      if(autoType.toe){ document.getElementById('floattoe').value=''; autoType.toe=false; }
+    }
     update();
+  }
+  /* 画像からの判定を上の選択欄へ自動入力（手動で選んでいれば尊重） */
+  function applyAutoType(){
+    const a = autoStats.before || autoStats.after;
+    if(!a) return;
+    const archSel=document.getElementById('arch');
+    if(a.arch && (archSel.value==='' || autoType.arch)){ archSel.value=a.arch; autoType.arch=true; }
+    const toeSel=document.getElementById('floattoe');
+    if(a.toe && (toeSel.value==='' || autoType.toe)){ toeSel.value=a.toe; autoType.toe=true; }
   }
 
   /* 画像の色→圧力の目安。左右／前後（上下）の重み比を推定 */
@@ -478,15 +493,13 @@
     const phase = getMetric('before','lr')?'before':(getMetric('after','lr')?'after':null);
     const auto = (phase && autoStats[phase]) ? autoStats[phase] : null;
 
-    // アーチ：手入力が優先／空欄なら画像からの目安
-    let archV=document.getElementById('arch').value, archSrc='';
-    if(!archV && auto && auto.arch){ archV=auto.arch; archSrc='目安（画像から）'; }
-    if(archV && EXPL.arch[archV]){ const e=Object.assign({},EXPL.arch[archV]); e.src=archSrc; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
+    // アーチ（画像から自動入力なら目安バッジ／手で選べば選択）
+    const archV=document.getElementById('arch').value;
+    if(archV && EXPL.arch[archV]){ const e=Object.assign({},EXPL.arch[archV]); e.src=autoType.arch?'目安（画像から）':''; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
 
-    // 浮き指：手入力が優先／空欄なら画像からの目安
-    let toeV=document.getElementById('floattoe').value, toeSrc='';
-    if(!toeV && auto && auto.toe){ toeV=auto.toe; toeSrc='目安（画像から）'; }
-    if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src=toeSrc; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
+    // 浮き指
+    const toeV=document.getElementById('floattoe').value;
+    if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src=autoType.toe?'目安（画像から）':''; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
 
     if(phase){
       const lr=getMetric(phase,'lr');
