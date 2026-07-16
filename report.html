@@ -127,6 +127,7 @@
   .tg{font-style:normal;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px}
   .tg.good{background:#e4f6ef;color:#1c8f68}
   .tg.warn{background:#fdf1dd;color:#a9761f}
+  .tg.est{background:#f0ede8;color:#977c46}
   .sline{font-size:12.5px;margin:5px 0;color:var(--navy)}
   .sline b{display:block;color:var(--gray);font-weight:700;font-size:11px;margin-bottom:1px}
   .sline.mc b{color:var(--accent-ink)}
@@ -328,6 +329,9 @@
       const ctx = cv.getContext('2d'); ctx.drawImage(img,0,0,W,H);
       const d = ctx.getImageData(0,0,W,H).data;
       let L=0,R=0,T=0,B=0,tot=0;
+      const rowW=[new Float64Array(H),new Float64Array(H)];   // 左足/右足の行ごと圧力
+      const rowA=[new Float64Array(H),new Float64Array(H)];   // 左足/右足の行ごと接地面積
+      const yMin=[H,H], yMax=[-1,-1];
       for(let y=0;y<H;y++){
         for(let x=0;x<W;x++){
           const i=(y*W+x)*4, w=px2weight(d[i],d[i+1],d[i+2]);
@@ -335,10 +339,40 @@
           tot+=w;
           if(x < W/2) L+=w; else R+=w;
           if(y < H/2) T+=w; else B+=w;
+          const f = x < W/2 ? 0 : 1;
+          rowW[f][y]+=w; rowA[f][y]+=1;
+          if(y<yMin[f]) yMin[f]=y; if(y>yMax[f]) yMax[f]=y;
         }
       }
       if(tot<=0) return null;
-      return { lr:[L/tot*100, R/tot*100], fb:[T/tot*100, B/tot*100] };
+
+      // 足ごとに Arch Index（中足部面積/全体）と つま先接地比 を計算（つま先＝上と想定）
+      const AIs=[], toeR=[];
+      for(let f=0;f<2;f++){
+        if(yMax[f]<0) continue;
+        const y0=yMin[f], y1=yMax[f], len=y1-y0+1;
+        if(len<10) continue;
+        const toeCut=y0+Math.round(len*0.15);       // 上15%＝つま先
+        const bodyTop=toeCut, bodyLen=y1-bodyTop+1;
+        if(bodyLen<6) continue;
+        const t1=bodyTop+Math.round(bodyLen/3), t2=bodyTop+Math.round(bodyLen*2/3);
+        let aFore=0,aMid=0,aHeel=0,wToe=0,wFore=0;
+        for(let y=y0;y<=y1;y++){
+          if(y<toeCut){ wToe+=rowW[f][y]; }
+          else if(y<t1){ aFore+=rowA[f][y]; wFore+=rowW[f][y]; }
+          else if(y<t2){ aMid+=rowA[f][y]; }
+          else { aHeel+=rowA[f][y]; }
+        }
+        const denom=aFore+aMid+aHeel;
+        if(denom>0) AIs.push(aMid/denom);
+        if(wFore>0) toeR.push(wToe/wFore);
+      }
+      let arch=null, toe=null, ai=null;
+      if(AIs.length){ ai=AIs.reduce((a,b)=>a+b,0)/AIs.length;
+        arch = ai<0.21 ? 'ハイアーチ' : (ai>0.26 ? '扁平' : '正常'); }
+      if(toeR.length){ const tr=Math.min.apply(null,toeR);   // 悪い方の足
+        toe = tr<0.20 ? 'あり' : 'なし'; }
+      return { lr:[L/tot*100, R/tot*100], fb:[T/tot*100, B/tot*100], arch, toe, ai };
     }catch(e){ return null; }
   }
   /* 色→圧力の重み（赤=強い…青=弱い、背景/白/灰は除外） */
@@ -423,7 +457,8 @@
       mc:'三点支持で指を含めた接地をサポートし、足裏全体で支えることを目指します。'}
   };
   function stateCard(e){
-    return `<div class="scard"><div class="stitle">${e.t}${e.tag?`<em class="tg ${e.cls}">${e.tag}</em>`:''}</div>`+
+    const src = e.src?`<em class="tg est">${e.src}</em>`:'';
+    return `<div class="scard"><div class="stitle">${e.t}${e.tag?`<em class="tg ${e.cls}">${e.tag}</em>`:''}${src}</div>`+
       `<div class="sline"><b>これは？</b>${e.what}</div>`+
       `<div class="sline"><b>影響（一般的な傾向）</b>${e.eff}</div>`+
       `<div class="sline mc"><b>MARINE COREの狙い</b>${e.mc}</div></div>`;
@@ -431,11 +466,19 @@
   function buildState(){
     const wrap=document.getElementById('stateWrap');
     const cards=[]; const concerns=[];
-    const arch=document.getElementById('arch').value;
-    const toe=document.getElementById('floattoe').value;
-    if(arch && EXPL.arch[arch]){ const e=EXPL.arch[arch]; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
-    if(toe==='あり'){ cards.push(stateCard(EXPL.floattoe)); concerns.push('浮き指の傾向'); }
     const phase = getMetric('before','lr')?'before':(getMetric('after','lr')?'after':null);
+    const auto = (phase && autoStats[phase]) ? autoStats[phase] : null;
+
+    // アーチ：手入力が優先／空欄なら画像からの目安
+    let archV=document.getElementById('arch').value, archSrc='';
+    if(!archV && auto && auto.arch){ archV=auto.arch; archSrc='目安（画像から）'; }
+    if(archV && EXPL.arch[archV]){ const e=Object.assign({},EXPL.arch[archV]); e.src=archSrc; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
+
+    // 浮き指：手入力が優先／空欄なら画像からの目安
+    let toeV=document.getElementById('floattoe').value, toeSrc='';
+    if(!toeV && auto && auto.toe){ toeV=auto.toe; toeSrc='目安（画像から）'; }
+    if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src=toeSrc; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
+
     if(phase){
       const lr=getMetric(phase,'lr');
       if(lr){ const vv=verdictLR(lr.v), L=Math.round(lr.v[0]);
