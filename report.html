@@ -146,6 +146,20 @@
   .mcphil .mctext{flex:1;min-width:210px;font-size:13px;line-height:1.75}
   .mcphil .mctext b{color:var(--accent-ink)}
   .mcphil .mcnote{display:block;margin-top:8px;font-size:11px;color:var(--gray);line-height:1.5}
+  .modeseg{display:flex;gap:8px;flex-wrap:wrap}
+  .mopt{flex:1;min-width:150px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;background:#fff}
+  .mopt input{margin:2px 0 0}
+  .mopt span{font-weight:700;font-size:13px;line-height:1.3}
+  .mopt em{display:block;font-weight:400;font-size:11px;color:var(--gray);font-style:normal;margin-top:2px}
+  .mopt:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 2px rgba(47,107,240,.12)}
+  .aipanel{margin-top:10px;padding:12px;border:1px dashed var(--line);border-radius:12px}
+  .aipanel input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13px;box-sizing:border-box}
+  .btn2{margin-top:8px;background:var(--navy);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer}
+  .aimsg{display:inline-block;margin-left:10px;font-size:12px;color:var(--gray)}
+  .judgebox{display:flex;gap:10px;flex-wrap:wrap}
+  .jrow{flex:1;min-width:130px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#f6f8fc}
+  .jrow span{font-size:12px;color:var(--gray)}
+  .jrow b{font-size:14px}
 
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
@@ -231,35 +245,34 @@
       </div>
     </div>
 
+    <!-- 判定モード（担当は選ばなくてOK：自動で判定＆コメント） -->
     <div class="field">
-      <label>分析の数値 <span class="hint">機器の数値があれば入力（当面、画像からの自動計算はオフ）</span></label>
-      <div class="anin">
-        <div class="anrow"><b>装着前</b>左右：左<input class="mini" id="lbefore" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fbefore" type="number" min="0" max="100" oninput="update()">%</div>
-        <div class="anrow"><b>マリンコア装着後</b>左右：左<input class="mini" id="lafter" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fafter" type="number" min="0" max="100" oninput="update()">%</div>
+      <label>判定モード <span class="hint">担当は選ばなくてOK。読み込んだ画像から自動で判定＆コメントします</span></label>
+      <div class="modeseg">
+        <label class="mopt"><input type="radio" name="jmode" value="local" checked onchange="setMode()"><span>端末内で自動<em>無料／画像は端末の外に出ません</em></span></label>
+        <label class="mopt"><input type="radio" name="jmode" value="ai" onchange="setMode()"><span>本物のAI<em>要APIキー／画像をAIへ送信</em></span></label>
+      </div>
+      <div id="aiPanel" class="aipanel" style="display:none">
+        <input id="aiKey" type="password" placeholder="AnthropicのAPIキー（sk-ant-…）を貼り付け" oninput="saveKey()" autocomplete="off">
+        <div class="hint">キーはこの端末だけに保存され、私のサーバーには送りません。<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">キーを取得</a></div>
+        <button type="button" class="btn2" onclick="runAI()">AIで判定する</button>
+        <span id="aiMsg" class="aimsg"></span>
       </div>
     </div>
 
+    <!-- タイプ判定は自動。buildState が参照する値をここに保持 -->
+    <input type="hidden" id="arch"><input type="hidden" id="floattoe">
+
     <div class="field">
-      <label>足のタイプ判定 <span class="hint">担当が選んでください（当面、画像からの自動判定はオフ）</span></label>
-      <div class="row2">
-        <div class="field" style="margin-bottom:0"><label style="font-size:13px">アーチ</label>
-          <select id="arch" class="num" onchange="autoType.arch=false;update()">
-            <option value="">未評価</option>
-            <option value="正常">正常</option>
-            <option value="扁平">扁平足の傾向（低アーチ）</option>
-            <option value="ハイアーチ">ハイアーチの傾向（高アーチ）</option>
-          </select></div>
-        <div class="field" style="margin-bottom:0"><label style="font-size:13px">浮き指</label>
-          <select id="floattoe" class="num" onchange="autoType.toe=false;update()">
-            <option value="">未評価</option>
-            <option value="なし">該当なし</option>
-            <option value="あり">傾向あり</option>
-          </select></div>
+      <label>自動判定の結果 <span class="hint" id="judgeSrc">画像を読み込むと自動で入ります</span></label>
+      <div class="judgebox">
+        <div class="jrow"><span>アーチ</span><b id="jArch">—</b></div>
+        <div class="jrow"><span>浮き指</span><b id="jToe">—</b></div>
       </div>
     </div>
 
-    <div class="field"><label>ひとことコメント <span class="hint">任意</span></label>
-      <textarea id="comment" class="num" placeholder="例）マリンコア装着後は前足部への荷重が分散し、指の接地が増えています。" oninput="update()"></textarea></div>
+    <div class="field"><label>ひとことコメント <span class="hint" id="cmtSrc">自動生成（必要なら手直しできます）</span></label>
+      <textarea id="comment" class="num" placeholder="画像を読み込むと、自動でコメントが入ります" oninput="commentEdited=true;update()"></textarea></div>
   </section>
 
   <section class="report card">
@@ -322,15 +335,15 @@
 <script>
   const imgs = {before:null, after:null};
   const autoStats = {before:null, after:null};   // 画像からの目安 {lr,fb,arch,toe}
-  const autoType  = {arch:false, toe:false};      // タイプ欄を画像から自動入力したか
-  // 【安全策・2026-07-16】写真/画面撮影では自動判定が誤る（扁平の誤判定・左右89:11等）ため、
-  // 画像からの自動判定（アーチ・浮き指・左右前後の目安）を当面オフ。手入力の測定値と担当コメントは有効。
-  // ADONIS足圧計の書き出し対応・トリミング機能を作ったら true に戻す。
-  const AUTO_ANALYSIS = false;
+  const autoType  = {arch:false, toe:false};      // タイプを画像/AIから入れたか
+  let commentEdited = false;                       // コメントを手動で直したか
+  // 判定モード：'local'＝端末内で自動解析／'ai'＝外部AI（キーはこの端末に保存、直接呼び出し）
+  function mode(){ const el=document.querySelector('input[name=jmode]:checked'); return el?el.value:'local'; }
 
   (function(){
     const d = new Date(), p = n => String(n).padStart(2,'0');
     document.getElementById('date').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+    try{ const k=localStorage.getItem('mc_ai_key'); if(k) document.getElementById('aiKey').value=k; }catch(e){}
     update();
   })();
 
@@ -345,7 +358,7 @@
       document.getElementById('drop'+cap(which)).innerHTML = '<img src="'+e.target.result+'">';
       document.getElementById('clr'+cap(which)).style.display = 'inline-block';
       const im = new Image();
-      im.onload = () => { if(AUTO_ANALYSIS){ autoStats[which] = analyzeImage(im); applyAutoType(); } update(); };
+      im.onload = () => { if(mode()==='local'){ autoStats[which] = analyzeImage(im); applyAutoType(); genComment(); } update(); };
       im.src = e.target.result;
       update();
     };
@@ -357,21 +370,50 @@
     document.getElementById('file'+cap(which)).value = '';
     document.getElementById('drop'+cap(which)).innerHTML = '<span>タップして選択／撮影</span>';
     document.getElementById('clr'+cap(which)).style.display = 'none';
-    // 画像が無くなったら自動入力したタイプ欄も戻す
+    // 画像が無くなったら自動入力したタイプ欄・自動コメントも戻す
     if(!imgs.before && !imgs.after){
       if(autoType.arch){ document.getElementById('arch').value=''; autoType.arch=false; }
       if(autoType.toe){ document.getElementById('floattoe').value=''; autoType.toe=false; }
+      reflectJudge();
+      if(!commentEdited) document.getElementById('comment').value='';
     }
     update();
   }
-  /* 画像からの判定を上の選択欄へ自動入力（手動で選んでいれば尊重） */
+  /* 画像/AIからの判定を（隠し）タイプ欄へ自動入力 */
   function applyAutoType(){
     const a = autoStats.before || autoStats.after;
     if(!a) return;
-    const archSel=document.getElementById('arch');
-    if(a.arch && (archSel.value==='' || autoType.arch)){ archSel.value=a.arch; autoType.arch=true; }
-    const toeSel=document.getElementById('floattoe');
-    if(a.toe && (toeSel.value==='' || autoType.toe)){ toeSel.value=a.toe; autoType.toe=true; }
+    if(a.arch){ document.getElementById('arch').value=a.arch; autoType.arch=true; }
+    if(a.toe){ document.getElementById('floattoe').value=a.toe; autoType.toe=true; }
+    reflectJudge();
+  }
+  /* 判定結果を画面の表示欄に反映 */
+  function reflectJudge(){
+    const arch=document.getElementById('arch').value, toe=document.getElementById('floattoe').value;
+    const am={'正常':'正常タイプ','扁平':'扁平足の傾向（低アーチ）','ハイアーチ':'ハイアーチの傾向（高アーチ）'};
+    document.getElementById('jArch').textContent = arch ? (am[arch]||arch) : '—';
+    document.getElementById('jToe').textContent  = toe==='あり' ? '傾向あり' : (toe==='なし' ? '該当なし' : '—');
+  }
+  /* 端末内モード：観測できた圧の目安から、薬機法セーフなコメントを自動生成 */
+  function genComment(){
+    if(commentEdited) return;
+    const c = composeComment();
+    document.getElementById('comment').value = (c==null ? '' : c);
+  }
+  function composeComment(){
+    if(!imgs.before && !imgs.after && !autoStats.before && !autoStats.after) return null;
+    const seg=[];
+    const lr=getMetric('after','lr')||getMetric('before','lr');
+    const fb=getMetric('after','fb')||getMetric('before','fb');
+    if(lr){ const L=Math.round(lr.v[0]); seg.push(`左右は 左${L}% / 右${100-L}%`); }
+    if(fb){ const F=Math.round(fb.v[0]); seg.push(`前後は 前足部${F}% / かかと${100-F}%`); }
+    const head = seg.length ? ('足圧の目安では、'+seg.join('、')+'でした。') : '';
+    const arch=document.getElementById('arch').value, toe=document.getElementById('floattoe').value;
+    const at={'正常':'土踏まずはほどよく保たれている傾向です。','扁平':'土踏まずは低めの傾向が見られます。','ハイアーチ':'土踏まずは高めの傾向が見られます。'}[arch]||'';
+    const tt = toe==='あり' ? '指の接地はやや浮きやすい傾向が見られます。' : '';
+    const design='MARINE COREは、かかと・母趾球・小趾球の3点を下から支え、指を含めた接地を目指した設計です。';
+    const note='※足圧は測定時の一例で、参考です（医学的な診断ではありません）。';
+    return [head,at,tt,design,note].filter(Boolean).join('');
   }
 
   /* 画像の色→圧力の目安。左右／前後（上下）の重み比を推定 */
@@ -592,10 +634,62 @@
     if(data){ box.classList.remove('empty'); box.innerHTML = '<img src="'+data+'">'; }
     else { box.classList.add('empty'); box.textContent = '画像なし'; }
   }
+  /* ===== モード切替 ===== */
+  function setMode(){
+    const m=mode();
+    document.getElementById('aiPanel').style.display = (m==='ai') ? 'block' : 'none';
+    document.getElementById('judgeSrc').textContent =
+      (m==='ai') ? '「AIで判定する」を押すと入ります' : '画像を読み込むと自動で入ります';
+    document.getElementById('cmtSrc').textContent =
+      (m==='ai') ? 'AIが生成（必要なら手直しできます）' : '自動生成（必要なら手直しできます）';
+    if(m==='local') reanalyze();
+  }
+  function reanalyze(){
+    ['before','after'].forEach(w=>{ if(imgs[w]){ const im=new Image();
+      im.onload=()=>{ autoStats[w]=analyzeImage(im); applyAutoType(); genComment(); update(); };
+      im.src=imgs[w]; } });
+  }
+  /* ===== 本物のAI（キーはこの端末に保存し、画像をAIへ直接送信） ===== */
+  function saveKey(){ try{ localStorage.setItem('mc_ai_key', document.getElementById('aiKey').value.trim()); }catch(e){} }
+  async function runAI(){
+    const key=(document.getElementById('aiKey').value||'').trim();
+    const msg=document.getElementById('aiMsg');
+    if(!key){ msg.textContent='APIキーを入れてください'; return; }
+    const img = imgs.after || imgs.before;
+    if(!img){ msg.textContent='先に足圧画像を読み込んでください'; return; }
+    msg.textContent='AIが判定中…';
+    try{
+      const mm = img.match(/^data:(image\/[\w.+-]+);base64,(.+)$/);
+      const media = mm?mm[1]:'image/png', b64 = mm?mm[2]:img.split(',')[1];
+      const prompt = 'これは足裏の足圧分布画像です（赤＝圧が高い、青＝低い）。日本の薬機法を厳守し、これは医療機器ではない前提で、診断・治療・予防・改善・矯正などの断定表現は一切使わないでください。次のJSONだけを返し、前後に文章を付けないこと: {"arch":"正常|扁平|ハイアーチ","toe":"あり|なし","comment":"日本語120字以内。観測される圧の分布の描写と、MARINE COREが3点（かかと・母趾球・小趾球）と指の接地を目指す設計である旨のみ。効果は断定しない。末尾に『※参考です（医学的診断ではありません）』を付ける"}';
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body: JSON.stringify({ model:'claude-sonnet-5', max_tokens:500,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:media,data:b64}},
+            {type:'text',text:prompt}]}] })
+      });
+      if(!res.ok){ const t=await res.text(); throw new Error('APIエラー '+res.status+'（'+t.slice(0,80)+'）'); }
+      const data=await res.json();
+      const txt=(data.content&&data.content[0]&&data.content[0].text)||'';
+      const jm=txt.match(/\{[\s\S]*\}/); if(!jm) throw new Error('AIの返答を解釈できませんでした');
+      const o=JSON.parse(jm[0]);
+      if(o.arch){ document.getElementById('arch').value=o.arch; autoType.arch=true; }
+      if(o.toe){ document.getElementById('floattoe').value=o.toe; autoType.toe=true; }
+      reflectJudge();
+      if(o.comment){ document.getElementById('comment').value=o.comment; commentEdited=false; }
+      update();
+      msg.textContent='AI判定を反映しました';
+    }catch(e){ msg.textContent='失敗：'+e.message; }
+  }
+
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
-    ['name','staff','comment','lbefore','fbefore','lafter','fafter','arch','floattoe'].forEach(id=>document.getElementById(id).value='');
+    ['name','staff','comment','arch','floattoe'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
+    autoType.arch=false; autoType.toe=false; commentEdited=false;
+    reflectJudge();
     clearImg('before'); clearImg('after');
     update();
   }
