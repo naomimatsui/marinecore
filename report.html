@@ -197,7 +197,7 @@
     </div>
 
     <div class="field">
-      <label>足圧画像の読み込み <span class="hint">📷撮影 または 🖼画像を選ぶ（左右・前後の目安を自動分析します）</span></label>
+      <label>足圧画像の読み込み <span class="hint">📷撮影 または 🖼画像を選ぶ（当面、自動分析はオフ。画像は記録用）</span></label>
       <div class="uploads">
         <div class="up">
           <label>装着前</label>
@@ -225,7 +225,7 @@
     </div>
 
     <div class="field">
-      <label>分析の数値 <span class="hint">機器の数値があれば入力（空欄なら画像から目安を自動計算）</span></label>
+      <label>分析の数値 <span class="hint">機器の数値があれば入力（当面、画像からの自動計算はオフ）</span></label>
       <div class="anin">
         <div class="anrow"><b>装着前</b>左右：左<input class="mini" id="lbefore" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fbefore" type="number" min="0" max="100" oninput="update()">%</div>
         <div class="anrow"><b>マリンコア装着後</b>左右：左<input class="mini" id="lafter" type="number" min="0" max="100" oninput="update()">%　前後：前<input class="mini" id="fafter" type="number" min="0" max="100" oninput="update()">%</div>
@@ -233,7 +233,7 @@
     </div>
 
     <div class="field">
-      <label>足のタイプ判定 <span class="hint">画像を入れると自動で目安が入ります／手で選べば上書き</span></label>
+      <label>足のタイプ判定 <span class="hint">担当が選んでください（当面、画像からの自動判定はオフ）</span></label>
       <div class="row2">
         <div class="field" style="margin-bottom:0"><label style="font-size:13px">アーチ</label>
           <select id="arch" class="num" onchange="autoType.arch=false;update()">
@@ -304,6 +304,10 @@
   const imgs = {before:null, after:null};
   const autoStats = {before:null, after:null};   // 画像からの目安 {lr,fb,arch,toe}
   const autoType  = {arch:false, toe:false};      // タイプ欄を画像から自動入力したか
+  // 【安全策・2026-07-16】写真/画面撮影では自動判定が誤る（扁平の誤判定・左右89:11等）ため、
+  // 画像からの自動判定（アーチ・浮き指・左右前後の目安）を当面オフ。手入力の測定値と担当コメントは有効。
+  // ADONIS足圧計の書き出し対応・トリミング機能を作ったら true に戻す。
+  const AUTO_ANALYSIS = false;
 
   (function(){
     const d = new Date(), p = n => String(n).padStart(2,'0');
@@ -322,7 +326,7 @@
       document.getElementById('drop'+cap(which)).innerHTML = '<img src="'+e.target.result+'">';
       document.getElementById('clr'+cap(which)).style.display = 'inline-block';
       const im = new Image();
-      im.onload = () => { autoStats[which] = analyzeImage(im); applyAutoType(); update(); };
+      im.onload = () => { if(AUTO_ANALYSIS){ autoStats[which] = analyzeImage(im); applyAutoType(); } update(); };
       im.src = e.target.result;
       update();
     };
