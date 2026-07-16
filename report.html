@@ -117,6 +117,19 @@
   .bar.warn .segA{background:var(--mid)} .bar.warn .segB{background:#f3d59a}
   .bar.bad .segA{background:var(--high)} .bar.bad .segB{background:#f0b6ab}
   .mref{margin-top:7px;font-size:11px;color:var(--gray)}
+  /* あなたの足の状態 */
+  .state{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .state .shead{background:var(--blue);color:var(--accent-ink);font-weight:800;font-size:14px;padding:9px 16px}
+  .ssum{padding:11px 16px;font-size:13px;font-weight:800;background:var(--gray-soft);color:var(--navy)}
+  .scard{padding:13px 16px;border-bottom:1px solid var(--line)}
+  .scard:last-child{border-bottom:none}
+  .stitle{font-weight:800;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .tg{font-style:normal;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px}
+  .tg.good{background:#e4f6ef;color:#1c8f68}
+  .tg.warn{background:#fdf1dd;color:#a9761f}
+  .sline{font-size:12.5px;margin:5px 0;color:var(--navy)}
+  .sline b{display:block;color:var(--gray);font-weight:700;font-size:11px;margin-bottom:1px}
+  .sline.mc b{color:var(--accent-ink)}
 
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
@@ -203,6 +216,25 @@
       </div>
     </div>
 
+    <div class="field">
+      <label>足のタイプ判定 <span class="hint">機器の判定やおみの見立てを選択（任意・レポートに説明が出ます）</span></label>
+      <div class="row2">
+        <div class="field" style="margin-bottom:0"><label style="font-size:13px">アーチ</label>
+          <select id="arch" class="num" onchange="update()">
+            <option value="">未評価</option>
+            <option value="正常">正常</option>
+            <option value="扁平">扁平足の傾向（低アーチ）</option>
+            <option value="ハイアーチ">ハイアーチの傾向（高アーチ）</option>
+          </select></div>
+        <div class="field" style="margin-bottom:0"><label style="font-size:13px">浮き指</label>
+          <select id="floattoe" class="num" onchange="update()">
+            <option value="">未評価</option>
+            <option value="なし">該当なし</option>
+            <option value="あり">傾向あり</option>
+          </select></div>
+      </div>
+    </div>
+
     <div class="field"><label>ひとことコメント <span class="hint">任意</span></label>
       <textarea id="comment" class="num" placeholder="例）装着後は前足部への荷重が分散し、指の接地が増えています。" oninput="update()"></textarea></div>
   </section>
@@ -230,11 +262,16 @@
         <div id="anaBody"></div>
       </div>
 
+      <div class="state" id="stateWrap" style="display:none">
+        <div class="shead">あなたの足の状態（参考）</div>
+        <div id="stateBody"></div>
+      </div>
+
       <div class="comment" id="oCommentWrap" style="display:none"><b>コメント</b><span id="oComment"></span></div>
 
       <div class="rfoot">
         <div class="co"><b>MARINE CORE</b> ／ 株式会社アドニス　足元バランスの新基準</div>
-        <div class="note">※本製品は医療機器ではありません。疾患の診断・治療・予防を目的とするものではなく、足裏支持および歩行時の安定性を補助するフットウェア製品です。足圧画像・数値は測定時の一例で、効果を保証するものではありません。「目安」は画像の色から推定した参考値（つま先が上の向きを想定）で、測定機器の正式値とは異なります。</div>
+        <div class="note">※本製品は医療機器ではありません。疾患の診断・治療・予防を目的とするものではなく、足裏支持および歩行時の安定性を補助するフットウェア製品です。足圧画像・数値は測定時の一例で、効果を保証するものではありません。「目安」は画像の色から推定した参考値（つま先が上の向きを想定）で、測定機器の正式値とは異なります。足のタイプや傾向の判定は一般的な目安であり、医学的な診断ではありません。気になる点がある場合は専門家にご相談ください。</div>
       </div>
     </div>
 
@@ -364,6 +401,66 @@
     else wrap.style.display='none';
   }
 
+  /* 足タイプの説明（一般的な傾向・非診断） */
+  const EXPL = {
+    arch:{
+      '正常':{t:'アーチ：正常タイプ',tag:'良好',cls:'good',
+        what:'土踏まず（アーチ）がほどよく保たれているタイプです。',
+        eff:'アーチのクッションとバネが働きやすく、足裏で衝撃を受け止めやすい傾向です。',
+        mc:'今の良い状態を保つ、足元の土台づくりをサポートします。'},
+      '扁平':{t:'アーチ：扁平足の傾向（低アーチ）',tag:'要ケア',cls:'warn',
+        what:'土踏まずが低く、足裏が広く接地しやすいタイプです。',
+        eff:'アーチのクッションが働きにくく、足裏・膝・腰への負担や、疲れやすさ・むくみにつながることがあると言われます。',
+        mc:'アーチを下から支え、衝撃を面で分散することを目指します。'},
+      'ハイアーチ':{t:'アーチ：ハイアーチの傾向（高アーチ）',tag:'要ケア',cls:'warn',
+        what:'土踏まずが高く、接地がかかとと前足部に集中しやすいタイプです。',
+        eff:'接地面が狭く、一部に圧が集中して痛み・タコができやすい、衝撃を受けやすい傾向があると言われます。',
+        mc:'集中した圧を分散し、足裏全体で支えることを目指します。'}
+    },
+    floattoe:{t:'浮き指の傾向',tag:'要ケア',cls:'warn',
+      what:'立つ・歩くときに、足の指が地面にしっかり付かず浮きやすい状態の傾向です。',
+      eff:'体を支える面が減り、重心が後ろ（かかと）に偏りやすく、ふらつき・疲れ・むくみにつながることがあると言われます。',
+      mc:'三点支持で指を含めた接地をサポートし、足裏全体で支えることを目指します。'}
+  };
+  function stateCard(e){
+    return `<div class="scard"><div class="stitle">${e.t}${e.tag?`<em class="tg ${e.cls}">${e.tag}</em>`:''}</div>`+
+      `<div class="sline"><b>これは？</b>${e.what}</div>`+
+      `<div class="sline"><b>影響（一般的な傾向）</b>${e.eff}</div>`+
+      `<div class="sline mc"><b>MARINE COREの狙い</b>${e.mc}</div></div>`;
+  }
+  function buildState(){
+    const wrap=document.getElementById('stateWrap');
+    const cards=[]; const concerns=[];
+    const arch=document.getElementById('arch').value;
+    const toe=document.getElementById('floattoe').value;
+    if(arch && EXPL.arch[arch]){ const e=EXPL.arch[arch]; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
+    if(toe==='あり'){ cards.push(stateCard(EXPL.floattoe)); concerns.push('浮き指の傾向'); }
+    const phase = getMetric('before','lr')?'before':(getMetric('after','lr')?'after':null);
+    if(phase){
+      const lr=getMetric(phase,'lr');
+      if(lr){ const vv=verdictLR(lr.v), L=Math.round(lr.v[0]);
+        cards.push(stateCard({t:'左右バランス',tag:vv.t,cls:vv.c==='good'?'good':'warn',
+          what:`体重が 左${L}% / 右${100-L}% にかかっている状態です。`,
+          eff: vv.c==='good' ? '左右の差は小さく、バランスよく支えられている傾向です。' : '片側に負担が偏りやすく、疲れ・ふらつき・片側の痛みにつながることがあります。',
+          mc:'左右を均等に支える足元づくりをサポートします。'}));
+        if(vv.c!=='good') concerns.push('左右バランスの偏り'); }
+      const fb=getMetric(phase,'fb');
+      if(fb){ const f=Math.round(fb.v[0]); let msg,concern=false;
+        if(f>=55){ msg='つま先（前足部）寄りに体重がかかりやすい傾向です。'; concern=true; }
+        else if(f<=30){ msg='かかと（後方）に体重が偏りやすく、ふらつき・つまずきにつながることがあります。'; concern=true; }
+        else msg='前後の体重配分は、おおむね標準的な範囲です。';
+        cards.push(stateCard({t:'前後バランス',tag:concern?'要ケア':'良好',cls:concern?'warn':'good',
+          what:`前足部${f}% / かかと${100-f}% の配分です。`, eff:msg, mc:'重心移動をなめらかにし、安定した歩行をサポートします。'}));
+        if(concern) concerns.push('前後バランスの偏り'); }
+    }
+    if(!cards.length){ wrap.style.display='none'; return; }
+    const sum = concerns.length
+      ? `<div class="ssum">🔎 気になる点：${concerns.join('・')}<div style="font-weight:400;font-size:11px;color:var(--gray);margin-top:3px">※足圧の傾向の参考です（医学的診断ではありません）</div></div>`
+      : `<div class="ssum">😊 大きな偏りは見られません<div style="font-weight:400;font-size:11px;color:var(--gray);margin-top:3px">※足圧の傾向の参考です（医学的診断ではありません）</div></div>`;
+    document.getElementById('stateBody').innerHTML = sum + cards.join('');
+    wrap.style.display='';
+  }
+
   function esc(s){ return (s||''); }
   function fmtDate(v){ if(!v) return '—'; const [y,m,d]=v.split('-'); return `${y}年${Number(m)}月${Number(d)}日`; }
 
@@ -380,6 +477,7 @@
     setBox('boxBefore', imgs.before);
     setBox('boxAfter',  imgs.after);
     renderAnalysis();
+    buildState();
 
     const comment = document.getElementById('comment').value.trim();
     const cw = document.getElementById('oCommentWrap');
@@ -393,7 +491,7 @@
   }
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
-    ['name','staff','comment','lbefore','fbefore','lafter','fafter'].forEach(id=>document.getElementById(id).value='');
+    ['name','staff','comment','lbefore','fbefore','lafter','fafter','arch','floattoe'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
     clearImg('before'); clearImg('after');
     update();
