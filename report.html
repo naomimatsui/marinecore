@@ -205,7 +205,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-f</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-g</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="field">
@@ -214,6 +214,9 @@
       <div class="upbtns" style="margin-top:8px">
         <button type="button" class="minibtn cam" onclick="savePerson()">💾 この人を登録／更新</button>
         <button type="button" class="minibtn" onclick="deletePerson()">🗑 削除</button>
+        <button type="button" class="minibtn" onclick="exportPeople()">⤓ 書き出し（バックアップ）</button>
+        <label class="minibtn" for="importFile">⤒ 読み込み</label>
+        <input type="file" accept="application/json,.json" id="importFile" onchange="importPeople(this)" hidden>
         <span id="peopleMsg" style="font-size:12px;color:var(--low);align-self:center"></span>
       </div>
     </div>
@@ -832,6 +835,38 @@
     persistPeople(); renderPeople(); document.getElementById('personSel').value='new'; peopleMsg('削除しました');
   }
   function peopleMsg(t, warn){ const m=document.getElementById('peopleMsg'); m.textContent=t; m.style.color = warn ? 'var(--high)' : 'var(--low)'; setTimeout(function(){ if(m.textContent===t) m.textContent=''; }, 3000); }
+  function exportPeople(){
+    if(!people.length){ peopleMsg('登録がありません', true); return; }
+    const blob=new Blob([JSON.stringify(people,null,2)], {type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const d=new Date(), z=n=>String(n).padStart(2,'0');
+    const a=document.createElement('a');
+    a.href=url; a.download='marinecore_登録者_'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    peopleMsg('書き出しました（'+people.length+'人）');
+  }
+  function importPeople(input){
+    const f=input.files && input.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=function(e){
+      try{
+        const arr=JSON.parse(e.target.result);
+        if(!Array.isArray(arr)) throw new Error('形式が違います');
+        let added=0, updated=0;
+        arr.forEach(function(rec){
+          if(!rec || typeof rec!=='object') return;
+          if(!rec.id) rec.id=String(Date.now())+Math.floor(Math.random()*1000);
+          const ex=people.find(function(x){ return String(x.id)===String(rec.id); });
+          if(ex){ Object.assign(ex,rec); updated++; } else { people.push(rec); added++; }
+        });
+        persistPeople(); renderPeople();
+        peopleMsg('読み込み完了（追加'+added+'・更新'+updated+'）');
+      }catch(err){ peopleMsg('読み込み失敗：'+err.message, true); }
+      input.value='';
+    };
+    r.readAsText(f);
+  }
 </script>
 </body>
 </html>
