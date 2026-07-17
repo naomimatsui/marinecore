@@ -101,6 +101,7 @@
     background:var(--blue);border-radius:12px;font-size:14px}
   .sizes div span{color:var(--gray);font-size:12px;display:block}
   .sizes div b{font-size:15px}
+  .req{color:var(--high);font-weight:700;font-size:11px;margin-left:4px}
 
   /* analysis in report */
   .ana{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -204,7 +205,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-d</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-e</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="row2">
@@ -213,6 +214,14 @@
       <div class="field"><label>測定日</label>
         <input id="date" class="num" type="date" oninput="update()"></div>
     </div>
+    <div class="row2">
+      <div class="field"><label>年齢 <span class="req">必須</span></label>
+        <input id="age" class="num" type="number" min="0" max="120" placeholder="例）58" oninput="update()"></div>
+      <div class="field"><label>電話番号 <span class="hint">任意</span></label>
+        <input id="phone" class="num" type="tel" placeholder="例）090-1234-5678" oninput="update()"></div>
+    </div>
+    <div class="field"><label>メールアドレス <span class="hint">任意</span></label>
+      <input id="email" class="num" type="email" placeholder="例）xxx@example.com" oninput="update()"></div>
     <div class="row2">
       <div class="field"><label>店舗・担当 <span class="hint">任意</span></label>
         <input id="staff" class="num" placeholder="例）ADONIS ○○店 / 担当：おみ" oninput="update()"></div>
@@ -324,9 +333,12 @@
     <div class="rbody">
       <div class="meta">
         <div><span>お客様</span><b id="oName">—</b></div>
+        <div id="oAgeWrap"><span>年齢</span><b id="oAge">—</b></div>
         <div><span>測定日</span><b id="oDate">—</b></div>
         <div><span>店舗・担当</span><b id="oStaff">—</b></div>
         <div id="oDeviceWrap"><span>測定機器</span><b id="oDevice">—</b></div>
+        <div id="oEmailWrap" style="display:none"><span>メール</span><b id="oEmail">—</b></div>
+        <div id="oPhoneWrap" style="display:none"><span>電話</span><b id="oPhone">—</b></div>
       </div>
 
       <div class="sizes" id="sizeWrap" style="display:none">
@@ -680,6 +692,16 @@
     document.getElementById('oMc').textContent   = mc ? (mc+'（'+(MC_LABEL[mc]||'')+'）') : '—';
     document.getElementById('sizeWrap').style.display = (shoe||foot||mc) ? 'flex' : 'none';
 
+    // 年齢・連絡先
+    const age=document.getElementById('age').value.trim();
+    document.getElementById('oAge').textContent = age ? age+'歳' : '—';
+    const email=document.getElementById('email').value.trim();
+    const ew=document.getElementById('oEmailWrap');
+    if(email){ ew.style.display=''; document.getElementById('oEmail').textContent=email; } else ew.style.display='none';
+    const phone=document.getElementById('phone').value.trim();
+    const pw=document.getElementById('oPhoneWrap');
+    if(phone){ pw.style.display=''; document.getElementById('oPhone').textContent=phone; } else pw.style.display='none';
+
     setBox('boxBefore', imgs.before);
     setBox('boxAfter',  imgs.after);
     setBox('boxWeeks4', imgs.weeks4);
@@ -752,7 +774,7 @@
 
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
-    ['name','staff','comment','arch','floattoe','capBefore','capAfter','capWeeks4','shoeSize','footSize','mcSize'].forEach(id=>document.getElementById(id).value='');
+    ['name','age','phone','email','staff','comment','arch','floattoe','capBefore','capAfter','capWeeks4','shoeSize','footSize','mcSize'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
     autoType.arch=false; autoType.toe=false; commentEdited=false; mcSizeManual=false;
     reflectJudge();
