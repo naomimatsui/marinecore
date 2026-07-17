@@ -205,8 +205,18 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-e</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-f</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
+
+    <div class="field">
+      <label>登録者リスト <span class="hint">スマホの無い方・お年寄り・ご家族も、この1台に登録して呼び出せます</span></label>
+      <select id="personSel" class="num" onchange="loadPerson()"><option value="new">＋ 新規入力</option></select>
+      <div class="upbtns" style="margin-top:8px">
+        <button type="button" class="minibtn cam" onclick="savePerson()">💾 この人を登録／更新</button>
+        <button type="button" class="minibtn" onclick="deletePerson()">🗑 削除</button>
+        <span id="peopleMsg" style="font-size:12px;color:var(--low);align-self:center"></span>
+      </div>
+    </div>
 
     <div class="row2">
       <div class="field"><label>お客様名 <span class="hint">任意</span></label>
@@ -403,11 +413,13 @@
   function onFootSize(){ if(!mcSizeManual){ document.getElementById('mcSize').value = mcSizeFromFoot(parseFloat(document.getElementById('footSize').value)); } update(); }
   // 判定モード：'local'＝端末内で自動解析／'ai'＝外部AI（キーはこの端末に保存、直接呼び出し）
   function mode(){ const el=document.querySelector('input[name=jmode]:checked'); return el?el.value:'local'; }
+  let people = [];
 
   (function(){
     const d = new Date(), p = n => String(n).padStart(2,'0');
     document.getElementById('date').value = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
     try{ const k=localStorage.getItem('mc_ai_key'); if(k) document.getElementById('aiKey').value=k; }catch(e){}
+    loadPeople();
     update();
   })();
 
@@ -781,6 +793,45 @@
     clearImg('before'); clearImg('after'); clearImg('weeks4');
     update();
   }
+
+  /* ===== 登録者リスト（この端末に保存・スマホ不要／お年寄り／家族向け） ===== */
+  function loadPeople(){ try{ people = JSON.parse(localStorage.getItem('mc_people')||'[]'); }catch(e){ people=[]; } renderPeople(); }
+  function persistPeople(){ try{ localStorage.setItem('mc_people', JSON.stringify(people)); }catch(e){} }
+  function renderPeople(){
+    const sel=document.getElementById('personSel'); const cur=sel.value;
+    sel.innerHTML='<option value="new">＋ 新規入力</option>'+people.map(p=>'<option value="'+p.id+'">'+(p.name||'(名前なし)')+(p.age?'（'+p.age+'歳）':'')+'</option>').join('');
+    if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+  }
+  function pv(id){ return document.getElementById(id).value.trim(); }
+  function loadPerson(){
+    const id=document.getElementById('personSel').value;
+    if(id==='new'){ ['name','age','email','phone','shoeSize','footSize','mcSize'].forEach(x=>document.getElementById(x).value=''); mcSizeManual=false; update(); return; }
+    const p=people.find(x=>String(x.id)===String(id)); if(!p) return;
+    document.getElementById('name').value=p.name||'';
+    document.getElementById('age').value=p.age||'';
+    document.getElementById('email').value=p.email||'';
+    document.getElementById('phone').value=p.phone||'';
+    document.getElementById('shoeSize').value=p.shoe||'';
+    document.getElementById('footSize').value=p.foot||'';
+    document.getElementById('mcSize').value=p.mc||''; mcSizeManual=!!p.mc;
+    update();
+  }
+  function savePerson(){
+    const rec={ name:pv('name'), age:pv('age'), email:pv('email'), phone:pv('phone'), shoe:pv('shoeSize'), foot:pv('footSize'), mc:document.getElementById('mcSize').value };
+    if(!rec.name && !rec.phone && !rec.email){ peopleMsg('名前か連絡先を入れてください', true); return; }
+    const sel=document.getElementById('personSel'); let id=sel.value;
+    if(id==='new'){ id=String(Date.now()); rec.id=id; people.push(rec); }
+    else { const p=people.find(x=>String(x.id)===String(id)); if(p){ Object.assign(p,rec); } else { id=String(Date.now()); rec.id=id; people.push(rec); } }
+    persistPeople(); renderPeople(); sel.value=id; peopleMsg('登録しました');
+  }
+  function deletePerson(){
+    const id=document.getElementById('personSel').value;
+    if(id==='new') return;
+    if(!confirm('この登録を削除しますか？')) return;
+    people=people.filter(x=>String(x.id)!==String(id));
+    persistPeople(); renderPeople(); document.getElementById('personSel').value='new'; peopleMsg('削除しました');
+  }
+  function peopleMsg(t, warn){ const m=document.getElementById('peopleMsg'); m.textContent=t; m.style.color = warn ? 'var(--high)' : 'var(--low)'; setTimeout(function(){ if(m.textContent===t) m.textContent=''; }, 3000); }
 </script>
 </body>
 </html>
