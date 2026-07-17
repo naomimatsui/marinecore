@@ -294,13 +294,14 @@
           <input type="file" accept="image/*" id="fileAfter" onchange="loadImg(this,'after')" hidden>
         </div>
         <div class="up">
-          <label>4週間後 <span class="hint">任意</span></label>
+          <label>再計測（後日）<span class="hint">4週間後・1ヶ月後など</span></label>
           <label class="drop" for="fileWeeks4" id="dropWeeks4"><span>タップして選択／撮影</span></label>
           <div class="upbtns">
             <label class="minibtn cam" for="camWeeks4">📷 撮影</label>
             <label class="minibtn" for="fileWeeks4">🖼 画像を選ぶ</label>
             <span class="clearimg" id="clrWeeks4" style="display:none" onclick="clearImg('weeks4')">消す</span>
           </div>
+          <input type="date" class="cap" id="dateWeeks4" oninput="update()" title="再計測した日付">
           <input type="text" class="cap" id="capWeeks4" placeholder="一言メモ（任意）" oninput="update()">
           <input type="file" accept="image/*" capture="environment" id="camWeeks4" onchange="loadImg(this,'weeks4')" hidden>
           <input type="file" accept="image/*" id="fileWeeks4" onchange="loadImg(this,'weeks4')" hidden>
@@ -363,7 +364,7 @@
       <div class="scans">
         <div class="scan before"><span class="chip">装着前</span><div class="imgbox empty" id="boxBefore">画像なし</div><div class="scap" id="scapBefore"></div></div>
         <div class="scan after"><span class="chip">マリンコア装着後</span><div class="imgbox empty" id="boxAfter">画像なし</div><div class="scap" id="scapAfter"></div></div>
-        <div class="scan weeks4" id="scanWeeks4" style="display:none"><span class="chip">4週間後</span><div class="imgbox empty" id="boxWeeks4">画像なし</div><div class="scap" id="scapWeeks4"></div></div>
+        <div class="scan weeks4" id="scanWeeks4" style="display:none"><span class="chip" id="chipWeeks4">再計測</span><div class="imgbox empty" id="boxWeeks4">画像なし</div><div class="scap" id="scapWeeks4"></div></div>
       </div>
 
       <div class="ana" id="anaWrap" style="display:none">
@@ -699,6 +700,14 @@
 
   function esc(s){ return (s||''); }
   function fmtDate(v){ if(!v) return '—'; const [y,m,d]=v.split('-'); return `${y}年${Number(m)}月${Number(d)}日`; }
+  /* 基準日から再計測日までの相対表示（約N週間後／約Nヶ月後） */
+  function relLabel(base, later){
+    if(!base || !later) return '';
+    const d = Math.round((new Date(later) - new Date(base))/86400000);
+    if(d <= 0) return '';
+    if(d < 25) return `約${Math.max(1,Math.round(d/7))}週間後`;
+    return `約${Math.round(d/30)}ヶ月後`;
+  }
 
   function update(){
     document.getElementById('oName').textContent  = document.getElementById('name').value.trim() || '—';
@@ -733,6 +742,9 @@
     setBox('boxAfter',  imgs.after);
     setBox('boxWeeks4', imgs.weeks4);
     document.getElementById('scanWeeks4').style.display = imgs.weeks4 ? '' : 'none';
+    (function(){ const dw=document.getElementById('dateWeeks4').value, base=document.getElementById('date').value;
+      const rel=relLabel(base,dw); const chip=document.getElementById('chipWeeks4');
+      if(chip) chip.textContent = dw ? (fmtDate(dw)+(rel?`（${rel}）`:'')) : '再計測'; })();
     document.getElementById('scapBefore').textContent = document.getElementById('capBefore').value.trim();
     document.getElementById('scapAfter').textContent  = document.getElementById('capAfter').value.trim();
     document.getElementById('scapWeeks4').textContent = document.getElementById('capWeeks4').value.trim();
