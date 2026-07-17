@@ -205,7 +205,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-a</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-b</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="field">
@@ -528,8 +528,8 @@
       const fb = (T+B>0)?[T/(T+B)*100, B/(T+B)*100]:[50,50];
       // 足ごとに Arch Index と つま先接地比（つま先＝上と想定）
       const feet=[[xMin,split-1],[split,xMax]];
-      const AIs=[], toeR=[];
-      for(const seg of feet){
+      const AIs=[], toeR=[], toeMarks=[];
+      for(let fi=0; fi<feet.length; fi++){ const seg=feet[fi];
         const fx0=seg[0], fx1=seg[1];
         const rowW=new Float64Array(H), rowA=new Float64Array(H);
         let fy0=H, fy1=-1;
@@ -550,13 +550,34 @@
         const den=aFore+aMid+aHeel;
         if(den>0) AIs.push(aMid/den);
         if(wFore>0) toeR.push(wToe/wFore);
+        // --- 5本指の接地（参考・約58%精度）：前足部幅で正規化し、内側→外側に親〜小を割当 ---
+        const isLeft=(fi===0);            // 画像左＝左足
+        const rowA10=new Float64Array(H);
+        for(let y=fy0;y<=fy1;y++){ let c=0; for(let x=fx0;x<=fx1;x++){ if(wt[y*W+x]>0.10) c++; } rowA10[y]=c; }
+        let ffY=fy0, ffBest=-1; const ffEnd=fy0+Math.round(len*0.45);
+        for(let y=fy0;y<=ffEnd;y++){ if(rowA10[y]>ffBest){ ffBest=rowA10[y]; ffY=y; } }
+        let fxL=fx1, fxR=fx0;
+        for(let y=Math.max(fy0,ffY-2);y<=Math.min(fy1,ffY+2);y++){ for(let x=fx0;x<=fx1;x++){ if(wt[y*W+x]>0.10){ if(x<fxL)fxL=x; if(x>fxR)fxR=x; } } }
+        const fw=Math.max(1,fxR-fxL);
+        let tb1=fy0+3;
+        if(ffY-fy0>=5){ let gy=fy0+2, gb=Infinity; for(let y=fy0+2;y<ffY;y++){ if(rowA10[y]<gb){ gb=rowA10[y]; gy=y; } } tb1=Math.max(gy,fy0+3); }
+        const centers=[0.1,0.3,0.5,0.7,0.9], slot=[0,0,0,0,0];
+        for(let x=fx0;x<=fx1;x++){
+          let p=(x+0.5-fxL)/fw; if(p<0)p=0; if(p>1)p=1;
+          const m=isLeft?(1-p):p;
+          let si=0, sb=9; for(let i=0;i<5;i++){ const dd=Math.abs(centers[i]-m); if(dd<sb){ sb=dd; si=i; } }
+          if(sb>0.12) continue;
+          let wmax=0; for(let y=fy0;y<=tb1;y++){ const w=wt[y*W+x]; if(w>wmax)wmax=w; }
+          if(wmax>slot[si]) slot[si]=wmax;
+        }
+        toeMarks[fi]=slot.map(s=> s>=0.40?'○':(s>=0.12?'△':'✗')).join('');
       }
       let arch=null, toe=null, ai=null;
       if(AIs.length){ ai=AIs.reduce((a,b)=>a+b,0)/AIs.length;
         arch = ai<0.21 ? 'ハイアーチ' : (ai>0.26 ? '扁平' : '正常'); }
       if(toeR.length){ const tr=Math.min.apply(null,toeR);
         toe = tr<0.20 ? 'あり' : 'なし'; }
-      return { lr, fb, arch, toe, ai };
+      return { lr, fb, arch, toe, ai, toes:(toeMarks[0]&&toeMarks[1])?{left:toeMarks[0],right:toeMarks[1]}:null };
     }catch(e){ return null; }
   }
   /* 色→圧力の重み（赤=強い…青=弱い、背景/白/灰は除外） */
@@ -666,6 +687,17 @@
     // 浮き指（指の接地）
     const toeV=document.getElementById('floattoe').value;
     if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src='目安（画像から）'; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
+
+    // 指の接地マップ（5本×左右・参考／自動判定は発展途上・約58%）
+    const tm = (autoStats.before && autoStats.before.toes) || (autoStats.after && autoStats.after.toes);
+    if(tm){
+      const tn=['親','人差','中','薬','小'];
+      const trow=(label,marks)=>`<div style="display:flex;gap:5px;align-items:center;margin-top:6px"><span style="width:34px;font-size:12px;color:var(--gray)">${label}</span>`+
+        marks.split('').map((c,i)=>{const col=c==='○'?'#e2604b':(c==='△'?'#e0a13a':'#c9d2de');return `<span style="flex:1;text-align:center;border:1px solid var(--line);border-radius:8px;padding:3px 0;font-size:10px;color:var(--gray)">${tn[i]}<b style="display:block;font-size:15px;color:${col}">${c}</b></span>`;}).join('')+`</div>`;
+      cards.push(`<div class="scard"><div class="stitle">指の接地マップ（5本指）<em class="tg est">参考</em></div>`+
+        trow('左足',tm.left)+trow('右足',tm.right)+
+        `<div class="sline mc" style="color:var(--gray);font-size:11px;margin-top:8px">○=接地 ／ △=うっすら ／ ✗=なし。※自動判定は発展途上のため<b>参考値</b>です（実際の見え方と異なる場合あり）。装着・継続で全部の指が接地することを目指します。</div></div>`);
+    }
 
     // 圧の集中（かかと・前足部）※前後%は出さず、アーチ傾向から描写
     if(archType==='扁平'){
