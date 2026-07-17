@@ -205,7 +205,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-g</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-a</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="field">
@@ -596,7 +596,7 @@
   }
   function renderAnalysis(){
     const wrap=document.getElementById('anaWrap');
-    const defs=[['lr','左右バランス','左','右'],['fb','前後バランス','前','後']];
+    const defs=[['lr','左右バランス','左','右']];  // 前後%は廃止（プロが使わない指標）
     let html=''; let usedEst=false;
     defs.forEach(([key,label,a,b])=>{
       const bf=getMetric('before',key), af=getMetric('after',key);
@@ -649,34 +649,46 @@
   function buildState(){
     const wrap=document.getElementById('stateWrap');
     const cards=[]; const concerns=[];
-    const phase = getMetric('before','lr')?'before':(getMetric('after','lr')?'after':null);
-    const auto = (phase && autoStats[phase]) ? autoStats[phase] : null;
 
-    // アーチ（画像から自動入力なら目安バッジ／手で選べば選択）
-    const archV=document.getElementById('arch').value;
-    if(archV && EXPL.arch[archV]){ const e=Object.assign({},EXPL.arch[archV]); e.src=autoType.arch?'目安（画像から）':''; cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
+    // アーチ＝素足（装着前）でのみ判定。装着後は「アーチ支持中」
+    const beforeArch = autoStats.before && autoStats.before.arch;
+    const noAuto = !autoStats.before && !autoStats.after;      // AIモード等はhidden欄を使う
+    const archType = beforeArch || (noAuto ? (document.getElementById('arch').value||null) : null);
+    if(archType && EXPL.arch[archType]){ const e=Object.assign({},EXPL.arch[archType]); e.src='素足から';
+      cards.push(stateCard(e)); if(e.cls!=='good') concerns.push(e.t.replace('アーチ：','')); }
+    else if(!autoStats.before && autoStats.after){
+      cards.push(stateCard({t:'アーチ：装着後（アーチ支持中）',tag:'装着中',cls:'good',
+        what:'アーチのタイプは素足（装着前）で判定します。装着後はMARINE COREがアーチを下から支えている状態です。',
+        eff:'装着後は中足部（土踏まず）の接地が減り、かかと・前足部の支えへ荷重が集まりやすくなります（測定の一例）。',
+        mc:'3点を下から支え、指を含めた接地を目指す設計です。'})); }
 
-    // 浮き指
+    // 浮き指（指の接地）
     const toeV=document.getElementById('floattoe').value;
-    if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src=autoType.toe?'目安（画像から）':''; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
+    if(toeV==='あり'){ const e=Object.assign({},EXPL.floattoe); e.src='目安（画像から）'; cards.push(stateCard(e)); concerns.push('浮き指の傾向'); }
 
-    if(phase){
-      const lr=getMetric(phase,'lr');
-      if(lr){ const vv=verdictLR(lr.v), L=Math.round(lr.v[0]);
-        cards.push(stateCard({t:'左右バランス',tag:vv.t,cls:vv.c==='good'?'good':'warn',
-          what:`体重が 左${L}% / 右${100-L}% にかかっている状態です。`,
-          eff: vv.c==='good' ? '左右の差は小さく、バランスよく支えられている傾向です。' : '片側に負担が偏りやすく、疲れ・ふらつき・片側の痛みにつながることがあります。',
-          mc:'左右を均等に支える足元づくりをサポートします。'}));
-        if(vv.c!=='good') concerns.push('左右バランスの偏り'); }
-      const fb=getMetric(phase,'fb');
-      if(fb){ const f=Math.round(fb.v[0]); let msg,concern=false;
-        if(f>=55){ msg='つま先（前足部）寄りに体重がかかりやすい傾向です。'; concern=true; }
-        else if(f<=30){ msg='かかと（後方）に体重が偏りやすく、ふらつき・つまずきにつながることがあります。'; concern=true; }
-        else msg='前後の体重配分は、おおむね標準的な範囲です。';
-        cards.push(stateCard({t:'前後バランス',tag:concern?'要ケア':'良好',cls:concern?'warn':'good',
-          what:`前足部${f}% / かかと${100-f}% の配分です。`, eff:msg, mc:'重心移動をなめらかにし、安定した歩行をサポートします。'}));
-        if(concern) concerns.push('前後バランスの偏り'); }
+    // 圧の集中（かかと・前足部）※前後%は出さず、アーチ傾向から描写
+    if(archType==='扁平'){
+      cards.push(stateCard({t:'圧の集中（かかと・前足部）',tag:'要ケア',cls:'warn',
+        what:'かかとと前足部に圧が集まりやすく、土踏まずは広く接地、指（つま先）の接地は弱くなりやすいパターンです。',
+        eff:'かかと側に荷重が偏りやすく、指に力が入りにくい状態になりやすい傾向です（日本人に多い足）。',
+        mc:'かかと・母趾球・小趾球の3点で支え、指まで自然に接地することを目指す設計です。'}));
+      concerns.push('かかと・前足部への圧の集中');
+    } else if(archType==='ハイアーチ'){
+      cards.push(stateCard({t:'圧の集中（かかと・前足部）',tag:'要ケア',cls:'warn',
+        what:'土踏まずが浮きやすく、かかとと前足部の一部に圧が集中しやすいパターンです。',
+        eff:'接地面が狭く、一部に強い圧がかかってタコ・痛みが出やすい傾向があると言われます。',
+        mc:'集中した圧を分散し、足裏全体（3点＋指）で支えることを目指す設計です。'}));
+      concerns.push('一部への圧の集中');
     }
+
+    // 左右バランス
+    const lr = getMetric('before','lr') || getMetric('after','lr');
+    if(lr){ const vv=verdictLR(lr.v), L=Math.round(lr.v[0]);
+      cards.push(stateCard({t:'左右バランス',tag:vv.t,cls:vv.c==='good'?'good':'warn',
+        what:`体重が 左${L}% / 右${100-L}% にかかっている状態です。`,
+        eff: vv.c==='good' ? '左右の差は小さく、バランスよく支えられている傾向です。' : '片側に負担が偏りやすく、疲れ・ふらつき・片側の痛みにつながることがあります。',
+        mc:'左右を均等に支える足元づくりをサポートします。'}));
+      if(vv.c!=='good') concerns.push('左右バランスの偏り'); }
     if(!cards.length){ wrap.style.display='none'; return; }
     const sum = concerns.length
       ? `<div class="ssum">🔎 気になる点：${concerns.join('・')}<div style="font-weight:400;font-size:11px;color:var(--gray);margin-top:3px">※足圧の傾向の参考です（医学的診断ではありません）</div></div>`
