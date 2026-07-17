@@ -97,6 +97,10 @@
   .scap{margin-top:8px;font-size:12px;color:var(--navy);line-height:1.5}
   .cap{width:100%;margin-top:8px;font-size:13px;padding:8px 10px;border:1px solid var(--line);
     border-radius:10px;background:#fff;font-family:inherit;color:var(--navy)}
+  .sizes{display:flex;gap:26px;flex-wrap:wrap;margin:0 0 18px;padding:12px 16px;
+    background:var(--blue);border-radius:12px;font-size:14px}
+  .sizes div span{color:var(--gray);font-size:12px;display:block}
+  .sizes div b{font-size:15px}
 
   /* analysis in report */
   .ana{margin-top:22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -200,7 +204,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-c</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-d</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="row2">
@@ -218,6 +222,25 @@
           <option value="Aetrex Albert">Aetrex Albert</option>
           <option value="その他">その他</option>
           <option value="">記載しない</option>
+        </select></div>
+    </div>
+
+    <div class="field">
+      <label>サイズ <span class="hint">お客様の靴サイズ・足の実測・MARINE COREサイズ</span></label>
+      <div class="row2">
+        <div class="field" style="margin-bottom:0"><label style="font-size:13px">靴のサイズ（申告・cm）</label>
+          <input id="shoeSize" class="num" type="number" step="0.5" min="15" max="35" placeholder="例）24.0" oninput="update()"></div>
+        <div class="field" style="margin-bottom:0"><label style="font-size:13px">実測サイズ（cm）</label>
+          <input id="footSize" class="num" type="number" step="0.1" min="15" max="35" placeholder="例）24.3" oninput="onFootSize()"></div>
+      </div>
+      <div class="field" style="margin-bottom:0;margin-top:12px"><label style="font-size:13px">MARINE COREサイズ <span class="hint">実測から自動／手で変更可</span></label>
+        <select id="mcSize" class="num" onchange="mcSizeManual=true;update()">
+          <option value="">—</option>
+          <option value="XS">XS（22.0〜23.0cm）</option>
+          <option value="S">S（23.5〜24.5cm）</option>
+          <option value="M">M（25.0〜26.0cm）</option>
+          <option value="L">L（26.5〜27.5cm）</option>
+          <option value="XL">XL（28.0〜29.0cm）</option>
         </select></div>
     </div>
 
@@ -306,6 +329,12 @@
         <div id="oDeviceWrap"><span>測定機器</span><b id="oDevice">—</b></div>
       </div>
 
+      <div class="sizes" id="sizeWrap" style="display:none">
+        <div><span>靴のサイズ（申告）</span><b id="oShoe">—</b></div>
+        <div><span>実測サイズ</span><b id="oFoot">—</b></div>
+        <div><span>MARINE COREサイズ</span><b id="oMc" style="color:var(--accent-ink)">—</b></div>
+      </div>
+
       <div class="scans">
         <div class="scan before"><span class="chip">装着前</span><div class="imgbox empty" id="boxBefore">画像なし</div><div class="scap" id="scapBefore"></div></div>
         <div class="scan after"><span class="chip">マリンコア装着後</span><div class="imgbox empty" id="boxAfter">画像なし</div><div class="scap" id="scapAfter"></div></div>
@@ -356,6 +385,10 @@
   const autoStats = {before:null, after:null, weeks4:null};   // 画像からの目安 {lr,fb,arch,toe}
   const autoType  = {arch:false, toe:false};      // タイプを画像/AIから入れたか
   let commentEdited = false;                       // コメントを手動で直したか
+  let mcSizeManual = false;                         // MARINE COREサイズを手動で選んだか
+  const MC_LABEL = {XS:'22.0〜23.0cm',S:'23.5〜24.5cm',M:'25.0〜26.0cm',L:'26.5〜27.5cm',XL:'28.0〜29.0cm'};
+  function mcSizeFromFoot(cm){ if(!(cm>0)) return ''; return cm<23.25?'XS':cm<24.75?'S':cm<26.25?'M':cm<27.75?'L':'XL'; }
+  function onFootSize(){ if(!mcSizeManual){ document.getElementById('mcSize').value = mcSizeFromFoot(parseFloat(document.getElementById('footSize').value)); } update(); }
   // 判定モード：'local'＝端末内で自動解析／'ai'＝外部AI（キーはこの端末に保存、直接呼び出し）
   function mode(){ const el=document.querySelector('input[name=jmode]:checked'); return el?el.value:'local'; }
 
@@ -638,6 +671,15 @@
     if(device){ dw.style.display=''; document.getElementById('oDevice').textContent = device; }
     else dw.style.display='none';
 
+    // サイズ
+    const shoe=document.getElementById('shoeSize').value.trim();
+    const foot=document.getElementById('footSize').value.trim();
+    const mc=document.getElementById('mcSize').value;
+    document.getElementById('oShoe').textContent = shoe ? shoe+'cm' : '—';
+    document.getElementById('oFoot').textContent = foot ? foot+'cm' : '—';
+    document.getElementById('oMc').textContent   = mc ? (mc+'（'+(MC_LABEL[mc]||'')+'）') : '—';
+    document.getElementById('sizeWrap').style.display = (shoe||foot||mc) ? 'flex' : 'none';
+
     setBox('boxBefore', imgs.before);
     setBox('boxAfter',  imgs.after);
     setBox('boxWeeks4', imgs.weeks4);
@@ -710,9 +752,9 @@
 
   function resetAll(){
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
-    ['name','staff','comment','arch','floattoe','capBefore','capAfter','capWeeks4'].forEach(id=>document.getElementById(id).value='');
+    ['name','staff','comment','arch','floattoe','capBefore','capAfter','capWeeks4','shoeSize','footSize','mcSize'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
-    autoType.arch=false; autoType.toe=false; commentEdited=false;
+    autoType.arch=false; autoType.toe=false; commentEdited=false; mcSizeManual=false;
     reflectJudge();
     clearImg('before'); clearImg('after'); clearImg('weeks4');
     update();
