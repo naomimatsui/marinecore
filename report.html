@@ -196,7 +196,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-a</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.17-b</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="row2">
@@ -655,7 +655,7 @@
     const key=(document.getElementById('aiKey').value||'').trim();
     const msg=document.getElementById('aiMsg');
     if(!key){ msg.textContent='APIキーを入れてください'; return; }
-    const img = imgs.after || imgs.before;
+    const img = imgs.before || imgs.after;
     if(!img){ msg.textContent='先に足圧画像を読み込んでください'; return; }
     msg.textContent='AIが判定中…';
     try{
