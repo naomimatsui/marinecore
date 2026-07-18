@@ -205,7 +205,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-c</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-d</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="field">
@@ -243,6 +243,12 @@
           <option value="ADONIS足圧計">ADONIS足圧計</option>
           <option value="Aetrex Albert">Aetrex Albert</option>
           <option value="その他">その他</option>
+          <option value="">記載しない</option>
+        </select></div>
+      <div class="field"><label>測定時の足元 <span class="hint">既定＝靴下・ストッキング（通常はこのまま）</span></label>
+        <select id="footwear" class="num" onchange="update()">
+          <option value="靴下・ストッキング">靴下・ストッキング</option>
+          <option value="素足（裸足）">素足（裸足）</option>
           <option value="">記載しない</option>
         </select></div>
     </div>
@@ -351,6 +357,7 @@
         <div><span>測定日</span><b id="oDate">—</b></div>
         <div><span>店舗・担当</span><b id="oStaff">—</b></div>
         <div id="oDeviceWrap"><span>測定機器</span><b id="oDevice">—</b></div>
+        <div id="oFootwearWrap"><span>足元</span><b id="oFootwear">—</b></div>
         <div id="oEmailWrap" style="display:none"><span>メール</span><b id="oEmail">—</b></div>
         <div id="oPhoneWrap" style="display:none"><span>電話</span><b id="oPhone">—</b></div>
       </div>
@@ -768,6 +775,11 @@
     document.getElementById('oDate').textContent  = fmtDate(document.getElementById('date').value);
 
     const device = document.getElementById('device').value;
+    const fwv = document.getElementById('footwear').value;
+    const fww = document.getElementById('oFootwearWrap');
+    if(fwv){ fww.style.display=''; document.getElementById('oFootwear').textContent = fwv; }
+    else fww.style.display='none';
+
     const dw = document.getElementById('oDeviceWrap');
     if(device){ dw.style.display=''; document.getElementById('oDevice').textContent = device; }
     else dw.style.display='none';
@@ -868,6 +880,7 @@
     if(!confirm('入力内容と画像をクリアします。よろしいですか？')) return;
     ['name','age','phone','email','staff','comment','arch','floattoe','capBefore','capAfter','capWeeks4','shoeSize','footSize','mcSize'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('device').value='ADONIS足圧計';
+    document.getElementById('footwear').value='靴下・ストッキング';
     autoType.arch=false; autoType.toe=false; commentEdited=false; mcSizeManual=false;
     reflectJudge();
     clearImg('before'); clearImg('after'); clearImg('weeks4');
