@@ -169,6 +169,9 @@
   .jrow{flex:1;min-width:130px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#f6f8fc}
   .jrow span{font-size:12px;color:var(--gray)}
   .jrow b{font-size:14px}
+  .posture{margin:0 0 12px;padding:11px 13px;border:1px solid #f0d9a8;background:#fff9ec;border-radius:12px}
+  .posture b{color:#8a6a1f}
+  .posture span{display:block;margin-top:4px;font-size:12px;line-height:1.65;color:#6b5a33}
 
   .comment{margin-top:18px;background:var(--blue);border-radius:14px;padding:14px 16px;
     font-size:14px;white-space:pre-wrap}
@@ -205,7 +208,7 @@
 <div class="wrap">
 
   <section class="card no-print">
-    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-d</span></h1>
+    <h1>足圧レポートを作成 <span style="font-size:11px;font-weight:400;color:var(--gray);vertical-align:middle;border:1px solid var(--line);border-radius:20px;padding:2px 8px">版 2026.07.18-e</span></h1>
     <p class="lead">Sennoscan などで書き出した足圧画像を読み込むと、MARINE CORE のレポートになります。画像はこの端末の中だけで処理され、サーバーには送信されません。</p>
 
     <div class="field">
@@ -273,6 +276,10 @@
     </div>
 
     <div class="field">
+      <div class="posture">
+        <b>📏 測定するときのお願い</b>
+        <span><b>まっすぐ前を見る／手は真横。</b>「測られてる」と意識すると、前のめりや後ろ重心になって<b>数値が変わってしまいます</b>。自然に立ってもらってから撮ってください。</span>
+      </div>
       <label>足圧画像の読み込み <span class="hint">📷撮影 または 🖼画像を選ぶ（読み込むと自動で判定＆コメント）</span></label>
       <div class="uploads">
         <div class="up">
