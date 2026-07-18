@@ -23,6 +23,7 @@
   .wrap{max-width:640px;margin:0 auto;padding:20px 16px 60px}
   .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
   h1{font-size:22px;margin:0 0 6px}
+  .ver{font-size:11px;font-weight:400;color:var(--gray);border:1px solid var(--line);border-radius:20px;padding:2px 8px;vertical-align:middle}
   .lead{color:var(--gray);font-size:13px;margin:0 0 6px}
   .q{margin:0 0 20px}
   .q label.qt{display:block;font-size:15px;font-weight:800;margin-bottom:9px}
@@ -31,7 +32,7 @@
   .num:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(47,126,216,.12)}
   .req{color:var(--high);font-weight:700;font-size:11px;margin-left:4px}
   .seg{display:flex;gap:8px;flex-wrap:wrap}
-  .seg button{flex:1;min-width:90px;font-family:inherit;font-size:14px;font-weight:700;padding:12px 10px;border:1px solid var(--line);border-radius:12px;background:var(--gray-soft);color:var(--navy);cursor:pointer;transition:.15s}
+  .seg button{flex:1;min-width:88px;font-family:inherit;font-size:14px;font-weight:700;padding:12px 8px;border:1px solid var(--line);border-radius:12px;background:var(--gray-soft);color:var(--navy);cursor:pointer;transition:.15s}
   .seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;cursor:pointer;font-family:inherit;font-size:17px;font-weight:800;padding:16px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#2461b0);color:#fff;box-shadow:0 8px 24px rgba(10,37,64,.22)}
   .btn.ghost{background:var(--gray-soft);color:var(--navy);box-shadow:none;border:1px solid var(--line);font-size:15px}
@@ -39,7 +40,6 @@
   .btnrow{display:flex;gap:10px;margin-top:10px}
   .err{color:var(--high);font-size:13px;font-weight:700;margin-top:8px;min-height:18px}
 
-  /* results */
   #result{display:none}
   .hero{text-align:center;padding:8px 0 4px}
   .hero .small{font-size:14px;color:var(--gray)}
@@ -54,6 +54,13 @@
   .agebar .pin{position:absolute;top:-5px;width:6px;height:24px;background:#12233b;border-radius:3px;transform:translateX(-50%);box-shadow:0 0 0 3px #fff}
   .barlab{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin:2px 6px 0}
 
+  .sec-title{font-weight:800;font-size:13px;color:var(--gray);margin:20px 0 8px}
+  .factors{background:var(--gray-soft);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+  .frow{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .frow:last-child{border-bottom:none}
+  .frow b{color:var(--high);font-weight:800}
+  .frow.good{color:var(--low)}
+
   .risk{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;margin-top:6px}
   .risk .dot{width:34px;height:34px;border-radius:50%;flex:none}
   .risk.low{background:#e4f6ef} .risk.low .dot{background:var(--low)}
@@ -67,7 +74,6 @@
   .advice b{display:block;color:var(--accent-ink);font-size:12px;margin-bottom:4px}
   .cta{margin-top:16px}
   .note{font-size:10.5px;color:var(--gray);line-height:1.5;margin-top:14px}
-  .sec-title{font-weight:800;font-size:13px;color:var(--gray);margin:20px 0 8px}
 </style>
 </head>
 <body>
@@ -84,9 +90,8 @@
 
 <div class="wrap">
 
-  <!-- 入力 -->
   <section class="card" id="form">
-    <h1>足年齢・転倒リスク チェック</h1>
+    <h1>足年齢・転倒リスク チェック <span class="ver">版 2026.07.18-b</span></h1>
     <p class="lead">道具なし・スマホだけ。1〜2分でできる「足の元気度」の<b>目安</b>チェックです。<br>※医学的な診断ではありません。気になる方は専門家にご相談ください。</p>
 
     <div class="q" style="margin-top:16px">
@@ -100,48 +105,41 @@
 
     <div class="q">
       <label class="qt">① 片足立ち、何秒できた？ <span class="req">必須</span></label>
-      <p class="hint" style="margin:0 0 9px">目を開けて、両手は腰。片足を軽く上げて、ぐらつくまで何秒キープできたか（最大60秒／やりやすい足で）。</p>
+      <p class="hint" style="margin:0 0 9px">目を開けて両手は腰。片足を上げてぐらつくまで何秒？（最大60秒／やりやすい足）</p>
       <input id="sec" class="num" type="number" min="0" max="60" placeholder="例）25（秒）" inputmode="numeric">
     </div>
 
-    <div class="q" data-key="trip">
-      <label class="qt">② 平らな所でつまずく？</label>
-      <div class="seg">
-        <button type="button" data-v="2">よくある</button>
-        <button type="button" data-v="1">ときどき</button>
-        <button type="button" data-v="0">ない</button>
-      </div>
-    </div>
-    <div class="q" data-key="swell">
-      <label class="qt">③ 夕方、足・ふくらはぎがむくむ？</label>
-      <div class="seg">
-        <button type="button" data-v="2">強い</button>
-        <button type="button" data-v="1">少し</button>
-        <button type="button" data-v="0">ない</button>
-      </div>
-    </div>
-    <div class="q" data-key="toe">
-      <label class="qt">④ 足の指をグー・パーできる？</label>
-      <div class="seg">
-        <button type="button" data-v="0">しっかり</button>
-        <button type="button" data-v="1">少し</button>
-        <button type="button" data-v="2">できない</button>
-      </div>
-    </div>
-    <div class="q" data-key="fall">
-      <label class="qt">⑤ この1年で転んだ／転びそうになった？</label>
-      <div class="seg">
-        <button type="button" data-v="2">転んだ</button>
-        <button type="button" data-v="1">ヒヤリ</button>
-        <button type="button" data-v="0">ない</button>
-      </div>
-    </div>
+    <div class="q" data-key="trip"><label class="qt">② 平らな所でつまずく？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">ときどき</button><button type="button" data-v="2">よくある</button></div></div>
+
+    <div class="q" data-key="walk"><label class="qt">③ 最近、歩くのが遅く・歩幅が小さくなった？</label>
+      <div class="seg"><button type="button" data-v="0">いいえ</button><button type="button" data-v="1">少し</button><button type="button" data-v="2">はい</button></div></div>
+
+    <div class="q" data-key="stairs"><label class="qt">④ 階段の下りや立ち上がりで、手すり・手をつく？</label>
+      <div class="seg"><button type="button" data-v="0">平気</button><button type="button" data-v="1">ときどき</button><button type="button" data-v="2">必要</button></div></div>
+
+    <div class="q" data-key="toe"><label class="qt">⑤ 足の指をグー・パーできる？（浮き指）</label>
+      <div class="seg"><button type="button" data-v="0">しっかり</button><button type="button" data-v="1">少し</button><button type="button" data-v="2">できない</button></div></div>
+
+    <div class="q" data-key="bunion"><label class="qt">⑥ 外反母趾（親指が内に曲がる）は？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">気になる</button><button type="button" data-v="2">はっきり</button></div></div>
+
+    <div class="q" data-key="callus"><label class="qt">⑦ タコ・魚の目・靴擦れができやすい？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">たまに</button><button type="button" data-v="2">よくできる</button></div></div>
+
+    <div class="q" data-key="pain"><label class="qt">⑧ 足裏や足の痛み（朝の一歩・長時間後）は？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">たまに</button><button type="button" data-v="2">よくある</button></div></div>
+
+    <div class="q" data-key="swell"><label class="qt">⑨ 夕方、足・ふくらはぎがむくむ？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">少し</button><button type="button" data-v="2">強い</button></div></div>
+
+    <div class="q" data-key="fall"><label class="qt">⑩ この1年で転んだ／転びそうになった？</label>
+      <div class="seg"><button type="button" data-v="0">ない</button><button type="button" data-v="1">ヒヤリ</button><button type="button" data-v="2">転んだ</button></div></div>
 
     <button class="btn" onclick="run()">結果を見る</button>
     <div class="err" id="err"></div>
   </section>
 
-  <!-- 結果 -->
   <section class="card" id="result">
     <div class="hero">
       <div class="small">実年齢 <b id="rAge">—</b>歳 のあなたの…</div>
@@ -152,12 +150,15 @@
       <div class="barlab"><span>若い</span><span>実年齢</span><span>高め</span></div>
     </div>
 
+    <div class="sec-title">足年齢を上げた要因（大きい順）</div>
+    <div class="factors" id="rFactors"></div>
+
     <div class="sec-title">転倒リスクの目安</div>
     <div class="risk" id="rRisk"><div class="dot"></div><div><b id="rRiskT">—</b><span id="rRiskS"></span></div></div>
 
     <div class="sec-title">足の元気バランス</div>
     <div class="type" id="rType">—</div>
-    <div class="radar-wrap"><svg id="radar" width="260" height="230" viewBox="0 0 260 230"></svg></div>
+    <div class="radar-wrap"><svg id="radar" width="280" height="250" viewBox="0 0 280 250"></svg></div>
 
     <div class="advice"><b>ワンポイント</b><span id="rAdvice"></span></div>
 
@@ -169,12 +170,25 @@
       </div>
     </div>
 
-    <div class="note">※本チェックは足の元気度の「目安」を示すものであり、医学的な診断ではありません。数値は一般的な目安（清水先生監修で確定予定）です。気になる点がある方は専門家・医師にご相談ください。MARINE CORE は足元のバランスを足裏側からサポートすることを目指した製品です。</div>
+    <div class="note">※本チェックは足の元気度の「目安」で、医学的な診断ではありません。数値は一般的な目安（清水先生監修で確定予定）です。気になる方は専門家・医師にご相談ください。MARINE CORE は足元のバランスを足裏側からサポートすることを目指した製品です。</div>
   </section>
 </div>
 
 <script>
-  const ans = {trip:null, swell:null, toe:null, fall:null};
+  // 各設問の重み（足年齢の加算・程度0/1/2）と要因ラベル
+  const W = {
+    trip:  {p:[0,2,4], f:'つまずき'},
+    walk:  {p:[0,2,4], f:'歩く力の低下'},
+    stairs:{p:[0,2,4], f:'下肢の支える力'},
+    toe:   {p:[0,2,4], f:'浮き指'},
+    bunion:{p:[0,1,3], f:'外反母趾'},
+    callus:{p:[0,1,2], f:'タコ・靴擦れ'},
+    pain:  {p:[0,1,3], f:'足の痛み'},
+    swell: {p:[0,1,2], f:'むくみ'},
+    fall:  {p:[0,2,5], f:'転倒・ヒヤリ'}
+  };
+  const KEYS = Object.keys(W);
+  const ans = {}; KEYS.forEach(k=>ans[k]=null);
   document.querySelectorAll('.q[data-key]').forEach(q=>{
     const key=q.dataset.key;
     q.querySelectorAll('.seg button').forEach(b=>{
@@ -191,17 +205,14 @@
     s=Math.max(0,Math.min(60,s));
     if(s>=REF[0][1]) return 20;
     if(s<=REF[REF.length-1][1]) return 90;
-    for(let i=0;i<REF.length-1;i++){
-      const a1=REF[i][0],s1=REF[i][1],a2=REF[i+1][0],s2=REF[i+1][1];
-      if(s<=s1 && s>=s2){ const t=(s1-s)/(s1-s2); return Math.round(a1+t*(a2-a1)); }
-    }
+    for(let i=0;i<REF.length-1;i++){ const a1=REF[i][0],s1=REF[i][1],a2=REF[i+1][0],s2=REF[i+1][1];
+      if(s<=s1 && s>=s2){ const t=(s1-s)/(s1-s2); return Math.round(a1+t*(a2-a1)); } }
     return 60;
   }
-  function expForAge(age){
-    age=Math.max(20,Math.min(90,age));
+  function expForAge(age){ age=Math.max(20,Math.min(90,age));
     for(let i=0;i<REF.length-1;i++){ if(age>=REF[i][0] && age<=REF[i+1][0]){ const t=(age-REF[i][0])/(REF[i+1][0]-REF[i][0]); return REF[i][1]+t*(REF[i+1][1]-REF[i][1]); } }
-    return 30;
-  }
+    return 30; }
+  const sevScore=s=>[100,55,20][s];
 
   function run(){
     const err=document.getElementById('err'); err.textContent='';
@@ -209,63 +220,64 @@
     const sec=parseFloat(document.getElementById('sec').value);
     if(!(age>0)){ err.textContent='実年齢を入れてください'; return; }
     if(!(sec>=0)){ err.textContent='片足立ちの秒数を入れてください（0〜60）'; return; }
-    if(ans.trip===null||ans.swell===null||ans.toe===null||ans.fall===null){ err.textContent='②〜⑤も選んでください'; return; }
+    for(const k of KEYS){ if(ans[k]===null){ err.textContent='②〜⑩も選んでください'; return; } }
 
     // 足年齢
     const balAge=balanceAgeFromSec(sec);
-    let adj=0;
-    adj += (ans.trip===2?4:ans.trip===1?2:0);
-    adj += (ans.swell===2?2:ans.swell===1?1:0);
-    adj += (ans.toe===2?3:ans.toe===1?1:0);
-    adj += (ans.fall===2?4:ans.fall===1?2:0);
-    let footAge=balAge+adj;
+    let add=0; const factors=[];
+    KEYS.forEach(k=>{ const p=W[k].p[ans[k]]; if(p>0){ add+=p; factors.push({label:W[k].f, pts:p}); } });
+    // 良好ボーナス（多くが最良なら少し若返り）
+    const goodCount=KEYS.filter(k=>ans[k]===0).length;
+    const bonus = goodCount>=8 ? -3 : goodCount>=6 ? -1 : 0;
+    let footAge=balAge+add+bonus;
     footAge=Math.max(age-15, Math.min(age+30, footAge));
     footAge=Math.max(15, Math.min(99, Math.round(footAge)));
+    factors.sort((a,b)=>b.pts-a.pts);
 
     // 転倒リスク
     let rp=0;
     rp += (sec<5?3:sec<10?2:sec<20?1:0);
-    rp += (ans.trip===2?2:ans.trip===1?1:0);
-    rp += (ans.fall===2?2:ans.fall===1?1:0);
-    rp += (ans.swell===2?1:0);
-    rp += (ans.toe===2?1:0);
-    const risk = rp<=2?'low':rp<=5?'mid':'high';
+    rp += ans.trip; rp += ans.fall;
+    rp += (ans.walk>=1?ans.walk:0); rp += (ans.stairs>=1?ans.stairs:0);
+    rp += (ans.swell===2?1:0); rp += (ans.toe===2?1:0); rp += (ans.pain===2?1:0);
+    const risk = rp<=3?'low':rp<=7?'mid':'high';
 
-    // レーダー（各0-100・高いほど良い）
+    // レーダー5軸（高いほど良い）
     const balance=Math.max(8,Math.min(100,Math.round(sec/expForAge(age)*75)));
-    const toeS=ans.toe===0?100:ans.toe===1?55:20;
-    const swellS=ans.swell===0?100:ans.swell===1?55:20;
-    const tripS=ans.trip===0?100:ans.trip===1?55:20;
-    const axes=[['バランス力',balance],['足指力',toeS],['むくみにくさ',swellS],['つまずきにくさ',tripS]];
+    const walk=sevScore(Math.max(ans.walk,ans.stairs,ans.trip));
+    const trouble=sevScore(Math.max(ans.bunion,ans.callus,ans.pain));
+    const axes=[['バランス力',balance],['足指力',sevScore(ans.toe)],['歩く力',walk],['むくみにくさ',sevScore(ans.swell)],['トラブルの少なさ',trouble]];
 
     // タイプ
-    let low=axes[0], i;
-    for(i=1;i<axes.length;i++){ if(axes[i][1]<low[1]) low=axes[i]; }
+    let low=axes[0]; for(let i=1;i<axes.length;i++){ if(axes[i][1]<low[1]) low=axes[i]; }
     const allHigh=axes.every(a=>a[1]>=70);
-    const typeMap={'バランス力':'バランス注意タイプ','足指力':'足指おやすみタイプ（浮き指ぎみ）','むくみにくさ':'むくみタイプ','つまずきにくさ':'つまずき注意タイプ'};
+    const typeMap={'バランス力':'バランス注意タイプ','足指力':'足指おやすみタイプ（浮き指ぎみ）','歩く力':'歩く力おとろえ注意タイプ','むくみにくさ':'むくみタイプ','トラブルの少なさ':'足トラブルタイプ'};
     const type=allHigh?'元気な足タイプ✨':typeMap[low[0]];
     const adviceMap={
-      'バランス力':'片足立ちが短めの傾向。足裏の3点（かかと・母趾球・小趾球）で支える感覚が大切です。MARINE COREは、この3点を下から支えることを目指します。',
+      'バランス力':'片足立ちが短めの傾向。足裏の3点（かかと・母趾球・小趾球）で支える感覚が大切。MARINE COREは3点を下から支えることを目指します。',
       '足指力':'足の指が使いにくい傾向（浮き指ぎみ）。指まで接地できると支えが安定します。MARINE COREは足裏全体で支えることを目指します。',
-      'むくみにくさ':'夕方のむくみが気になる傾向。長時間の立ち仕事では足元の負担が出やすいと言われます。足裏を面で支えることを目指します。',
-      'つまずきにくさ':'つまずきがやや気になる傾向。前足部への荷重移動をなめらかにする設計でサポートを目指します。'
+      '歩く力':'歩く力・下肢の支えがやや気になる傾向。足元を安定させて、なめらかな歩行をサポートすることを目指します。',
+      'むくみにくさ':'夕方のむくみが気になる傾向。足裏を面で支え、負担を分散することを目指します。',
+      'トラブルの少なさ':'外反母趾・タコ・痛みなどが気になる傾向。荷重の偏りを足元から整えることを目指します。'
     };
-    const advice=allHigh?'今の良い状態をキープしましょう！足裏の3点支持を意識すると、さらに安定します。':adviceMap[low[0]];
+    const advice=allHigh?'今の良い状態をキープしましょう！足裏の3点支持を意識するとさらに安定します。':adviceMap[low[0]];
 
     // 反映
     document.getElementById('rAge').textContent=age;
     document.getElementById('rFoot').textContent=footAge;
-    const diff=footAge-age;
-    const badge=document.getElementById('rBadge');
+    const diff=footAge-age; const badge=document.getElementById('rBadge');
     if(diff<=-2){ badge.className='badge young'; badge.textContent='実年齢より '+Math.abs(diff)+'歳 若い！'; }
     else if(diff>=2){ badge.className='badge old'; badge.textContent='実年齢より +'+diff+'歳 高め'; }
     else { badge.className='badge same'; badge.textContent='実年齢並み'; }
-    // ピン位置：diff -15→0%, 0→50%, +30→100%
-    const pos=Math.max(0,Math.min(100,((diff+15)/45)*100));
-    document.getElementById('rPin').style.left=pos+'%';
+    document.getElementById('rPin').style.left=Math.max(0,Math.min(100,((diff+15)/45)*100))+'%';
 
-    const rk=document.getElementById('rRisk');
-    rk.className='risk '+risk;
+    // 要因内訳
+    const fx=document.getElementById('rFactors');
+    if(factors.length){ fx.innerHTML=factors.slice(0,5).map(f=>'<div class="frow"><span>'+f.label+'</span><b>+'+f.pts+'歳</b></div>').join('')
+      + (bonus<0?'<div class="frow good"><span>良い項目が多い（若返り）</span><b style="color:var(--low)">'+bonus+'歳</b></div>':''); }
+    else { fx.innerHTML='<div class="frow good"><span>大きなマイナス要因はありません👍</span><b style="color:var(--low)">±0</b></div>'; }
+
+    const rk=document.getElementById('rRisk'); rk.className='risk '+risk;
     document.getElementById('rRiskT').textContent = risk==='low'?'低め🟢':risk==='mid'?'中くらい🟡':'高め🔴';
     document.getElementById('rRiskS').textContent = risk==='low'?'今の調子を保ちましょう':risk==='mid'?'足元のケアを意識しましょう':'足元の対策がおすすめ（参考）';
 
@@ -276,27 +288,18 @@
     document.getElementById('form').style.display='none';
     document.getElementById('result').style.display='block';
     window.scrollTo(0,0);
-    window.__res={age,footAge,risk,type};
+    window.__res={age,footAge,risk,type,top:factors[0]?factors[0].label:'なし'};
   }
 
   function drawRadar(axes){
-    const cx=130,cy=115,R=82;
-    const N=axes.length, ang=i=>(-90+i*360/N)*Math.PI/180;
+    const cx=140,cy=125,R=80, N=axes.length, ang=i=>(-90+i*360/N)*Math.PI/180;
     let svg='';
-    // grid rings
-    [0.25,0.5,0.75,1].forEach(f=>{
-      let p=''; for(let i=0;i<N;i++){ const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
-      svg+='<path d="'+p+'Z" fill="none" stroke="#e6eaf1" stroke-width="1"/>';
-    });
-    // axes + labels
+    [0.25,0.5,0.75,1].forEach(f=>{ let p=''; for(let i=0;i<N;i++){ const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); } svg+='<path d="'+p+'Z" fill="none" stroke="#e6eaf1"/>'; });
     for(let i=0;i<N;i++){ const x=cx+Math.cos(ang(i))*R, y=cy+Math.sin(ang(i))*R;
       svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e6eaf1"/>';
-      const lx=cx+Math.cos(ang(i))*(R+22), ly=cy+Math.sin(ang(i))*(R+16);
-      svg+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" font-weight="700" fill="#12233b" text-anchor="middle">'+axes[i][0]+'</text>';
-    }
-    // data polygon
-    let p='';
-    for(let i=0;i<N;i++){ const f=axes[i][1]/100; const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
+      const lx=cx+Math.cos(ang(i))*(R+26), ly=cy+Math.sin(ang(i))*(R+16);
+      svg+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="10.5" font-weight="700" fill="#12233b" text-anchor="middle">'+axes[i][0]+'</text>'; }
+    let p=''; for(let i=0;i<N;i++){ const f=axes[i][1]/100; const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
     svg+='<path d="'+p+'Z" fill="rgba(47,107,240,.22)" stroke="#2f6bf0" stroke-width="2"/>';
     document.getElementById('radar').innerHTML=svg;
   }
