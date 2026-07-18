@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARINE CORE かんたん足チェック（足年齢・転倒リスク）</title>
+<style>
+  :root{
+    --navy:#12233b; --navy-soft:#13385f; --blue:#eaf2fc; --blue-mid:#cfe4fa;
+    --accent:#2f6bf0; --accent-ink:#2159d6; --gray:#8b95a6; --gray-soft:#f4f6fa;
+    --line:#eceff4; --white:#fff; --low:#25b485; --mid:#eaa53a; --high:#e2604b;
+    --radius:20px; --shadow:0 10px 30px rgba(10,37,64,.10);
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+    color:var(--navy);background:var(--gray-soft);line-height:1.7}
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand b{font-size:16px;letter-spacing:.02em}
+  .brand span.sub{font-size:11px;color:var(--gray);display:block;font-weight:400;letter-spacing:.06em}
+  .logo{width:38px;height:26px;display:block}
+  .back{color:var(--accent);text-decoration:none;font-weight:700;font-size:14px}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 60px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+  h1{font-size:22px;margin:0 0 6px}
+  .lead{color:var(--gray);font-size:13px;margin:0 0 6px}
+  .q{margin:0 0 20px}
+  .q label.qt{display:block;font-size:15px;font-weight:800;margin-bottom:9px}
+  .q .hint{color:var(--gray);font-size:12px;font-weight:400}
+  .num{width:100%;font-size:17px;color:var(--navy);padding:13px 15px;border:1px solid var(--line);border-radius:14px;background:var(--gray-soft);outline:none;font-family:inherit}
+  .num:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(47,126,216,.12)}
+  .req{color:var(--high);font-weight:700;font-size:11px;margin-left:4px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:90px;font-family:inherit;font-size:14px;font-weight:700;padding:12px 10px;border:1px solid var(--line);border-radius:12px;background:var(--gray-soft);color:var(--navy);cursor:pointer;transition:.15s}
+  .seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;cursor:pointer;font-family:inherit;font-size:17px;font-weight:800;padding:16px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#2461b0);color:#fff;box-shadow:0 8px 24px rgba(10,37,64,.22)}
+  .btn.ghost{background:var(--gray-soft);color:var(--navy);box-shadow:none;border:1px solid var(--line);font-size:15px}
+  .btn:active{transform:scale(.99)}
+  .btnrow{display:flex;gap:10px;margin-top:10px}
+  .err{color:var(--high);font-size:13px;font-weight:700;margin-top:8px;min-height:18px}
+
+  /* results */
+  #result{display:none}
+  .hero{text-align:center;padding:8px 0 4px}
+  .hero .small{font-size:14px;color:var(--gray)}
+  .hero .fa{font-size:64px;font-weight:900;line-height:1.05;letter-spacing:-1px}
+  .hero .unit{font-size:24px;font-weight:800}
+  .badge{display:inline-block;font-weight:800;font-size:14px;padding:6px 16px;border-radius:999px;margin-top:8px}
+  .badge.young{background:#e4f6ef;color:#1c8f68}
+  .badge.same{background:var(--blue);color:var(--accent-ink)}
+  .badge.old{background:#fdf1dd;color:#a9761f}
+  .agebar{position:relative;height:14px;border-radius:8px;margin:16px 6px 4px;
+    background:linear-gradient(90deg,#25b485,#8fd0f0 45%,#eaa53a 75%,#e2604b)}
+  .agebar .pin{position:absolute;top:-5px;width:6px;height:24px;background:#12233b;border-radius:3px;transform:translateX(-50%);box-shadow:0 0 0 3px #fff}
+  .barlab{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin:2px 6px 0}
+
+  .risk{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;margin-top:6px}
+  .risk .dot{width:34px;height:34px;border-radius:50%;flex:none}
+  .risk.low{background:#e4f6ef} .risk.low .dot{background:var(--low)}
+  .risk.mid{background:#fdf1dd} .risk.mid .dot{background:var(--mid)}
+  .risk.high{background:#fdeae6} .risk.high .dot{background:var(--high)}
+  .risk b{font-size:16px} .risk span{font-size:12.5px;color:var(--gray);display:block}
+
+  .type{text-align:center;font-size:19px;font-weight:900;margin:4px 0}
+  .radar-wrap{display:flex;justify-content:center;margin:6px 0}
+  .advice{background:var(--blue);border-radius:14px;padding:14px 16px;font-size:14px;margin-top:6px}
+  .advice b{display:block;color:var(--accent-ink);font-size:12px;margin-bottom:4px}
+  .cta{margin-top:16px}
+  .note{font-size:10.5px;color:var(--gray);line-height:1.5;margin-top:14px}
+  .sec-title{font-weight:800;font-size:13px;color:var(--gray);margin:20px 0 8px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 38 26" aria-label="MARINE CORE"><defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12233b"/><stop offset="1" stop-color="#2f6bf0"/></linearGradient></defs>
+      <path fill="url(#g)" d="M2 20c6 0 8-6 14-6 4 0 6 3 10 3 3 0 5-2 5-2 0 6-6 9-12 9C10 24 2 20 2 20Zm5-7C10 8 15 4 22 4c5 0 9 3 11 7-2-1-4-2-7-2-6 0-8 5-13 5-3 0-6-1-6-1Z"/></svg>
+    <div><b>MARINE CORE</b><span class="sub">かんたん足チェック</span></div>
+  </div>
+  <a class="back" href="index.html">← もどる</a>
+</header>
+
+<div class="wrap">
+
+  <!-- 入力 -->
+  <section class="card" id="form">
+    <h1>足年齢・転倒リスク チェック</h1>
+    <p class="lead">道具なし・スマホだけ。1〜2分でできる「足の元気度」の<b>目安</b>チェックです。<br>※医学的な診断ではありません。気になる方は専門家にご相談ください。</p>
+
+    <div class="q" style="margin-top:16px">
+      <label class="qt">実年齢 <span class="req">必須</span></label>
+      <input id="age" class="num" type="number" min="5" max="110" placeholder="例）58" inputmode="numeric">
+    </div>
+    <div class="q">
+      <label class="qt">お名前 <span class="hint">（任意・結果に表示）</span></label>
+      <input id="name" class="num" placeholder="例）おみ">
+    </div>
+
+    <div class="q">
+      <label class="qt">① 片足立ち、何秒できた？ <span class="req">必須</span></label>
+      <p class="hint" style="margin:0 0 9px">目を開けて、両手は腰。片足を軽く上げて、ぐらつくまで何秒キープできたか（最大60秒／やりやすい足で）。</p>
+      <input id="sec" class="num" type="number" min="0" max="60" placeholder="例）25（秒）" inputmode="numeric">
+    </div>
+
+    <div class="q" data-key="trip">
+      <label class="qt">② 平らな所でつまずく？</label>
+      <div class="seg">
+        <button type="button" data-v="2">よくある</button>
+        <button type="button" data-v="1">ときどき</button>
+        <button type="button" data-v="0">ない</button>
+      </div>
+    </div>
+    <div class="q" data-key="swell">
+      <label class="qt">③ 夕方、足・ふくらはぎがむくむ？</label>
+      <div class="seg">
+        <button type="button" data-v="2">強い</button>
+        <button type="button" data-v="1">少し</button>
+        <button type="button" data-v="0">ない</button>
+      </div>
+    </div>
+    <div class="q" data-key="toe">
+      <label class="qt">④ 足の指をグー・パーできる？</label>
+      <div class="seg">
+        <button type="button" data-v="0">しっかり</button>
+        <button type="button" data-v="1">少し</button>
+        <button type="button" data-v="2">できない</button>
+      </div>
+    </div>
+    <div class="q" data-key="fall">
+      <label class="qt">⑤ この1年で転んだ／転びそうになった？</label>
+      <div class="seg">
+        <button type="button" data-v="2">転んだ</button>
+        <button type="button" data-v="1">ヒヤリ</button>
+        <button type="button" data-v="0">ない</button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="run()">結果を見る</button>
+    <div class="err" id="err"></div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="card" id="result">
+    <div class="hero">
+      <div class="small">実年齢 <b id="rAge">—</b>歳 のあなたの…</div>
+      <div style="font-size:15px;font-weight:800;margin-top:6px">足年齢の目安</div>
+      <div class="fa"><span id="rFoot">—</span><span class="unit">歳</span></div>
+      <div id="rBadge" class="badge same">—</div>
+      <div class="agebar"><div class="pin" id="rPin" style="left:50%"></div></div>
+      <div class="barlab"><span>若い</span><span>実年齢</span><span>高め</span></div>
+    </div>
+
+    <div class="sec-title">転倒リスクの目安</div>
+    <div class="risk" id="rRisk"><div class="dot"></div><div><b id="rRiskT">—</b><span id="rRiskS"></span></div></div>
+
+    <div class="sec-title">足の元気バランス</div>
+    <div class="type" id="rType">—</div>
+    <div class="radar-wrap"><svg id="radar" width="260" height="230" viewBox="0 0 260 230"></svg></div>
+
+    <div class="advice"><b>ワンポイント</b><span id="rAdvice"></span></div>
+
+    <div class="cta">
+      <a class="btn" href="report.html">📊 もっと正確に測る → 足圧診断へ</a>
+      <div class="btnrow">
+        <button class="btn ghost" onclick="shareResult()">結果をコピー（シェア）</button>
+        <button class="btn ghost" onclick="location.reload()">もう一度</button>
+      </div>
+    </div>
+
+    <div class="note">※本チェックは足の元気度の「目安」を示すものであり、医学的な診断ではありません。数値は一般的な目安（清水先生監修で確定予定）です。気になる点がある方は専門家・医師にご相談ください。MARINE CORE は足元のバランスを足裏側からサポートすることを目指した製品です。</div>
+  </section>
+</div>
+
+<script>
+  const ans = {trip:null, swell:null, toe:null, fall:null};
+  document.querySelectorAll('.q[data-key]').forEach(q=>{
+    const key=q.dataset.key;
+    q.querySelectorAll('.seg button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        q.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on'); ans[key]=Number(b.dataset.v);
+      });
+    });
+  });
+
+  // 年代別・片足立ちの目安（秒）※仮・清水先生監修で確定
+  const REF=[[20,60],[30,55],[40,45],[50,35],[60,25],[70,15],[80,8],[90,4]];
+  function balanceAgeFromSec(s){
+    s=Math.max(0,Math.min(60,s));
+    if(s>=REF[0][1]) return 20;
+    if(s<=REF[REF.length-1][1]) return 90;
+    for(let i=0;i<REF.length-1;i++){
+      const a1=REF[i][0],s1=REF[i][1],a2=REF[i+1][0],s2=REF[i+1][1];
+      if(s<=s1 && s>=s2){ const t=(s1-s)/(s1-s2); return Math.round(a1+t*(a2-a1)); }
+    }
+    return 60;
+  }
+  function expForAge(age){
+    age=Math.max(20,Math.min(90,age));
+    for(let i=0;i<REF.length-1;i++){ if(age>=REF[i][0] && age<=REF[i+1][0]){ const t=(age-REF[i][0])/(REF[i+1][0]-REF[i][0]); return REF[i][1]+t*(REF[i+1][1]-REF[i][1]); } }
+    return 30;
+  }
+
+  function run(){
+    const err=document.getElementById('err'); err.textContent='';
+    const age=parseInt(document.getElementById('age').value,10);
+    const sec=parseFloat(document.getElementById('sec').value);
+    if(!(age>0)){ err.textContent='実年齢を入れてください'; return; }
+    if(!(sec>=0)){ err.textContent='片足立ちの秒数を入れてください（0〜60）'; return; }
+    if(ans.trip===null||ans.swell===null||ans.toe===null||ans.fall===null){ err.textContent='②〜⑤も選んでください'; return; }
+
+    // 足年齢
+    const balAge=balanceAgeFromSec(sec);
+    let adj=0;
+    adj += (ans.trip===2?4:ans.trip===1?2:0);
+    adj += (ans.swell===2?2:ans.swell===1?1:0);
+    adj += (ans.toe===2?3:ans.toe===1?1:0);
+    adj += (ans.fall===2?4:ans.fall===1?2:0);
+    let footAge=balAge+adj;
+    footAge=Math.max(age-15, Math.min(age+30, footAge));
+    footAge=Math.max(15, Math.min(99, Math.round(footAge)));
+
+    // 転倒リスク
+    let rp=0;
+    rp += (sec<5?3:sec<10?2:sec<20?1:0);
+    rp += (ans.trip===2?2:ans.trip===1?1:0);
+    rp += (ans.fall===2?2:ans.fall===1?1:0);
+    rp += (ans.swell===2?1:0);
+    rp += (ans.toe===2?1:0);
+    const risk = rp<=2?'low':rp<=5?'mid':'high';
+
+    // レーダー（各0-100・高いほど良い）
+    const balance=Math.max(8,Math.min(100,Math.round(sec/expForAge(age)*75)));
+    const toeS=ans.toe===0?100:ans.toe===1?55:20;
+    const swellS=ans.swell===0?100:ans.swell===1?55:20;
+    const tripS=ans.trip===0?100:ans.trip===1?55:20;
+    const axes=[['バランス力',balance],['足指力',toeS],['むくみにくさ',swellS],['つまずきにくさ',tripS]];
+
+    // タイプ
+    let low=axes[0], i;
+    for(i=1;i<axes.length;i++){ if(axes[i][1]<low[1]) low=axes[i]; }
+    const allHigh=axes.every(a=>a[1]>=70);
+    const typeMap={'バランス力':'バランス注意タイプ','足指力':'足指おやすみタイプ（浮き指ぎみ）','むくみにくさ':'むくみタイプ','つまずきにくさ':'つまずき注意タイプ'};
+    const type=allHigh?'元気な足タイプ✨':typeMap[low[0]];
+    const adviceMap={
+      'バランス力':'片足立ちが短めの傾向。足裏の3点（かかと・母趾球・小趾球）で支える感覚が大切です。MARINE COREは、この3点を下から支えることを目指します。',
+      '足指力':'足の指が使いにくい傾向（浮き指ぎみ）。指まで接地できると支えが安定します。MARINE COREは足裏全体で支えることを目指します。',
+      'むくみにくさ':'夕方のむくみが気になる傾向。長時間の立ち仕事では足元の負担が出やすいと言われます。足裏を面で支えることを目指します。',
+      'つまずきにくさ':'つまずきがやや気になる傾向。前足部への荷重移動をなめらかにする設計でサポートを目指します。'
+    };
+    const advice=allHigh?'今の良い状態をキープしましょう！足裏の3点支持を意識すると、さらに安定します。':adviceMap[low[0]];
+
+    // 反映
+    document.getElementById('rAge').textContent=age;
+    document.getElementById('rFoot').textContent=footAge;
+    const diff=footAge-age;
+    const badge=document.getElementById('rBadge');
+    if(diff<=-2){ badge.className='badge young'; badge.textContent='実年齢より '+Math.abs(diff)+'歳 若い！'; }
+    else if(diff>=2){ badge.className='badge old'; badge.textContent='実年齢より +'+diff+'歳 高め'; }
+    else { badge.className='badge same'; badge.textContent='実年齢並み'; }
+    // ピン位置：diff -15→0%, 0→50%, +30→100%
+    const pos=Math.max(0,Math.min(100,((diff+15)/45)*100));
+    document.getElementById('rPin').style.left=pos+'%';
+
+    const rk=document.getElementById('rRisk');
+    rk.className='risk '+risk;
+    document.getElementById('rRiskT').textContent = risk==='low'?'低め🟢':risk==='mid'?'中くらい🟡':'高め🔴';
+    document.getElementById('rRiskS').textContent = risk==='low'?'今の調子を保ちましょう':risk==='mid'?'足元のケアを意識しましょう':'足元の対策がおすすめ（参考）';
+
+    document.getElementById('rType').textContent=type;
+    document.getElementById('rAdvice').textContent=advice;
+    drawRadar(axes);
+
+    document.getElementById('form').style.display='none';
+    document.getElementById('result').style.display='block';
+    window.scrollTo(0,0);
+    window.__res={age,footAge,risk,type};
+  }
+
+  function drawRadar(axes){
+    const cx=130,cy=115,R=82;
+    const N=axes.length, ang=i=>(-90+i*360/N)*Math.PI/180;
+    let svg='';
+    // grid rings
+    [0.25,0.5,0.75,1].forEach(f=>{
+      let p=''; for(let i=0;i<N;i++){ const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
+      svg+='<path d="'+p+'Z" fill="none" stroke="#e6eaf1" stroke-width="1"/>';
+    });
+    // axes + labels
+    for(let i=0;i<N;i++){ const x=cx+Math.cos(ang(i))*R, y=cy+Math.sin(ang(i))*R;
+      svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#e6eaf1"/>';
+      const lx=cx+Math.cos(ang(i))*(R+22), ly=cy+Math.sin(ang(i))*(R+16);
+      svg+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" font-weight="700" fill="#12233b" text-anchor="middle">'+axes[i][0]+'</text>';
+    }
+    // data polygon
+    let p='';
+    for(let i=0;i<N;i++){ const f=axes[i][1]/100; const x=cx+Math.cos(ang(i))*R*f, y=cy+Math.sin(ang(i))*R*f; p+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }
+    svg+='<path d="'+p+'Z" fill="rgba(47,107,240,.22)" stroke="#2f6bf0" stroke-width="2"/>';
+    document.getElementById('radar').innerHTML=svg;
+  }
+
+  function shareResult(){
+    const r=window.__res; if(!r) return;
+    const t='【MARINE CORE 足チェック】\n実年齢'+r.age+'歳 → 足年齢の目安 '+r.footAge+'歳／転倒リスク '+(r.risk==='low'?'低め':r.risk==='mid'?'中':'高め')+'\nタイプ：'+r.type+'\n#MARINECORE #足年齢 @naomiworld';
+    if(navigator.share){ navigator.share({text:t}).catch(()=>{}); }
+    else if(navigator.clipboard){ navigator.clipboard.writeText(t).then(()=>alert('結果をコピーしました。SNSに貼れます！')); }
+    else { alert(t); }
+  }
+</script>
+</body>
+</html>
